@@ -13,12 +13,12 @@ RUN apt-get update && apt-get install -y wget && \
 ENV PATH="/opt/conda/bin:$PATH"
 
 # Packages and versions specified in environment.yml
-COPY environment.yml
+COPY environment.yml /app/environment.yml
 
-#Update Conda environment with the specified packages
-RUN conda env update --file environment.yml && conda clean --all -y
+# Update Conda environment with the specified packages
+RUN conda env update --file /app/environment.yml -y && conda clean --all -y
 
-Copy project files
+# Copy project files
 COPY . /app
 
 # Expose RStudio and Jupyter Notebook ports
@@ -26,3 +26,4 @@ EXPOSE 8787 8888
 
 # Keep the container running
 CMD ["/init"]
+

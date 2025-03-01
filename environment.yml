@@ -13,4 +13,4 @@ dependencies:
   - r-usethis=2.1.5
   - r-vroom=1.5.7
   - unixodbc=2.3.9
-
+  - r-irkernel=1.3
