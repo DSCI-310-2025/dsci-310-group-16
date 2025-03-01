@@ -1,40 +1,30 @@
-FROM continuumio/miniconda3:latest 
+FROM rocker/r-ver:4.4.3
 
-# Set the working directory inside the container
-WORKDIR /app
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Copy Conda environment file
-COPY environment.yml /app/environment.yml
-
-# Install Mamba for faster dependency resolution
-RUN conda install -n base -c conda-forge mamba -y
-
-# Create and activate the environment
-RUN mamba env create -f /app/environment.yml && conda clean --all -y
-
-# Set environment path
-ENV PATH="/opt/conda/envs/r_env/bin:$PATH"
-ENV CONDA_DEFAULT_ENV=r_env
-
-# Install additional system dependencies
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    libxt6 \
-    libx11-xcb1 \
-    libxrender1 \
-    libxext6 \
-    libsm6 \
-    unixodbc \
-    && apt-get clean
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libxml2-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy project files
-COPY . /app
+# Install R packages with specific versions
+RUN R -e "install.packages(c(\"remotes\", \"devtools\"), repos='https://cloud.r-project.org/')"
+RUN R -e "install.packages('tidyverse', repos='https://cloud.r-project.org/', version='1.3.0')"
+RUN R -e "install.packages('data.table', repos='https://cloud.r-project.org/', version='1.13.0')"
+RUN R -e "install.packages('ggplot2', repos='https://cloud.r-project.org/', version='3.3.2')"
+RUN R -e "install.packages('dplyr', repos='https://cloud.r-project.org/', version='1.0.2')"
+RUN R -e "install.packages('shiny', repos='https://cloud.r-project.org/', version='1.5.0')"
+RUN R -e "install.packages('rmarkdown', repos='https://cloud.r-project.org/', version='2.3')"
 
-# Set the entrypoint to activate the Conda environment
-SHELL ["/bin/bash", "-c"]
-RUN echo "conda activate r_env" >> ~/.bashrc
+# Set working directory
+WORKDIR /home/rstudio
 
-# Expose RStudio port if needed
-EXPOSE 8787
+# Expose port for Shiny apps
+EXPOSE 3838
 
-# Default command: Keep the container running
-CMD ["bash"]
+CMD ["R"]
+
