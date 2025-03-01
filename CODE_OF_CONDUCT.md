@@ -42,7 +42,7 @@ Unacceptable behaviour will not be tolerated under any circumstances. Consequenc
 
 - Reporting to GitHub for violations of terms of service.
 
-5. ## Reporting and Dealing with Unacceptable Behaviour
+## Reporting and Dealing with Unacceptable Behaviour
 If you witness or experience any unacceptable behaviour, please report it as soon as possible to the project team. We will do our best to make this project safe and positive with your feedback!
 
 By contributing to our Bike Data Analysis, you agree to abide by this Code of Conduct. Thank you - Annmarie, Arya, and Christina
