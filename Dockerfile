@@ -1,9 +1,9 @@
-FROM continuumio/miniconda3:latest  # Using a clean Miniconda base image
+FROM continuumio/miniconda3:latest  # Use Miniconda base image
 
 # Set the working directory inside the container
 WORKDIR /app
 
-# Packages and versions specified in environment.yml
+# Copy Conda environment file
 COPY environment.yml /app/environment.yml
 
 # Install Mamba for faster dependency resolution
@@ -38,5 +38,3 @@ EXPOSE 8787
 
 # Default command: Keep the container running
 CMD ["bash"]
-
-
