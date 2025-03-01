@@ -2,20 +2,17 @@ name: Publish Docker Image
 
 on:
   push:
-    paths:
-      - "Dockerfile"
-      - ".github/workflows/publish_docker_image.yml"
-      - "environment.yml"
     branches:
-      - main  # Change this if your default branch is different
-  workflow_dispatch:  # Allows manual triggering of the workflow
+      - main  # Runs when changes are pushed to main branch
+    paths:
+      - 'Dockerfile'  # Triggers only when Dockerfile is changed
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Log in to Docker Hub
@@ -31,13 +28,16 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: ./Dockerfile
           push: true
-          tags: |
-            ${{ secrets.DOCKER_USERNAME }}/my_r_env:latest
-            ${{ secrets.DOCKER_USERNAME }}/my_r_env:${{ github.run_number }}
+          tags: ${{ secrets.DOCKER_USERNAME }}/dsci310-group-16:latest
 
-      - name: Create Git Tag for Versioning
-        run: |
-          TAG="v1.${{ github.run_number }}"
-          git tag $TAG
-          git push origin $TAG
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: "Docker Image v1.0.${{ github.run_number }}"
+          body: "Automatically built and pushed Docker image."
+          draft: false
+          prerelease: false
+
