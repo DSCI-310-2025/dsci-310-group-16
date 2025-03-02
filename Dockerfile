@@ -1,29 +1,30 @@
-FROM rocker/tidyverse:latest
+FROM rocker/r-ver:4.4.3
 
-# Set the working directory inside the container
-WORKDIR /app
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Install Conda
-RUN apt-get update && apt-get install -y wget && \
-    wget -O /tmp/miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
-    bash /tmp/miniconda.sh -b -p /opt/conda && \
-    rm /tmp/miniconda.sh
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libxml2-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Set Conda path
-ENV PATH="/opt/conda/bin:$PATH"
+# Install R packages with specific versions
+RUN R -e "install.packages(c(\"remotes\", \"devtools\"), repos='https://cloud.r-project.org/')"
+RUN R -e "install.packages('tidyverse', repos='https://cloud.r-project.org/', version='1.3.0')"
+RUN R -e "install.packages('data.table', repos='https://cloud.r-project.org/', version='1.13.0')"
+RUN R -e "install.packages('ggplot2', repos='https://cloud.r-project.org/', version='3.3.2')"
+RUN R -e "install.packages('dplyr', repos='https://cloud.r-project.org/', version='1.0.2')"
+RUN R -e "install.packages('shiny', repos='https://cloud.r-project.org/', version='1.5.0')"
+RUN R -e "install.packages('rmarkdown', repos='https://cloud.r-project.org/', version='2.3')"
 
-# Packages and versions specified in environment.yml
-COPY environment.yml /app/environment.yml
+# Set working directory
+WORKDIR /home/rstudio
 
-# Update Conda environment with the specified packages
-RUN conda env update --file /app/environment.yml -y && conda clean --all -y
+# Expose port for Shiny apps
+EXPOSE 3838
 
-# Copy project files
-COPY . /app
-
-# Expose RStudio and Jupyter Notebook ports
-EXPOSE 8787 8888
-
-# Keep the container running
-CMD ["/init"]
+CMD ["R"]
 
