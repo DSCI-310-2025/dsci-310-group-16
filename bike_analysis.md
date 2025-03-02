@@ -1,0 +1,365 @@
+Predicting Bike Rental Demand Using Regression Analysis
+================
+Annmarie Thomson, Arya Sardesai, Christina Zhang
+2025-1-3
+
+``` r
+set.seed(2024)
+library(vroom)
+library(tidyverse)
+```
+
+    ## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+    ## ✔ dplyr     1.1.4     ✔ readr     2.1.5
+    ## ✔ forcats   1.0.0     ✔ stringr   1.5.1
+    ## ✔ ggplot2   3.5.1     ✔ tibble    3.2.1
+    ## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+    ## ✔ purrr     1.0.2     
+    ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ✖ readr::col_character()   masks vroom::col_character()
+    ## ✖ readr::col_date()        masks vroom::col_date()
+    ## ✖ readr::col_datetime()    masks vroom::col_datetime()
+    ## ✖ readr::col_double()      masks vroom::col_double()
+    ## ✖ readr::col_factor()      masks vroom::col_factor()
+    ## ✖ readr::col_guess()       masks vroom::col_guess()
+    ## ✖ readr::col_integer()     masks vroom::col_integer()
+    ## ✖ readr::col_logical()     masks vroom::col_logical()
+    ## ✖ readr::col_number()      masks vroom::col_number()
+    ## ✖ readr::col_skip()        masks vroom::col_skip()
+    ## ✖ readr::col_time()        masks vroom::col_time()
+    ## ✖ readr::cols()            masks vroom::cols()
+    ## ✖ readr::date_names_lang() masks vroom::date_names_lang()
+    ## ✖ readr::default_locale()  masks vroom::default_locale()
+    ## ✖ dplyr::filter()          masks stats::filter()
+    ## ✖ readr::fwf_cols()        masks vroom::fwf_cols()
+    ## ✖ readr::fwf_empty()       masks vroom::fwf_empty()
+    ## ✖ readr::fwf_positions()   masks vroom::fwf_positions()
+    ## ✖ readr::fwf_widths()      masks vroom::fwf_widths()
+    ## ✖ dplyr::lag()             masks stats::lag()
+    ## ✖ readr::locale()          masks vroom::locale()
+    ## ✖ readr::output_column()   masks vroom::output_column()
+    ## ✖ readr::problems()        masks vroom::problems()
+    ## ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
+
+``` r
+library(tidymodels)
+```
+
+    ## ── Attaching packages ────────────────────────────────────── tidymodels 1.3.0 ──
+    ## ✔ broom        1.0.7     ✔ rsample      1.2.1
+    ## ✔ dials        1.4.0     ✔ tune         1.3.0
+    ## ✔ infer        1.0.7     ✔ workflows    1.2.0
+    ## ✔ modeldata    1.4.0     ✔ workflowsets 1.1.0
+    ## ✔ parsnip      1.3.0     ✔ yardstick    1.3.2
+    ## ✔ recipes      1.1.1     
+    ## ── Conflicts ───────────────────────────────────────── tidymodels_conflicts() ──
+    ## ✖ scales::discard() masks purrr::discard()
+    ## ✖ dplyr::filter()   masks stats::filter()
+    ## ✖ recipes::fixed()  masks stringr::fixed()
+    ## ✖ dplyr::lag()      masks stats::lag()
+    ## ✖ yardstick::spec() masks readr::spec(), vroom::spec()
+    ## ✖ recipes::step()   masks stats::step()
+
+``` r
+library(ggplot2)
+library(ucimlrepo)
+library(leaps)
+library(mltools)
+```
+
+    ## 
+    ## Attaching package: 'mltools'
+    ## 
+    ## The following objects are masked from 'package:yardstick':
+    ## 
+    ##     mcc, rmse
+    ## 
+    ## The following object is masked from 'package:tidyr':
+    ## 
+    ##     replace_na
+
+``` r
+library(ggpubr)
+```
+
+## Predicting Bike Rental Demand Using Regression Analysis
+
+### Summary
+
+### Introduction
+
+- provide some relevant background information on the topic so that
+  someone unfamiliar with it will be prepared to understand the rest of
+  your report
+
+- clearly state the question you tried to answer with your project
+
+- identify and describe the dataset that was used to answer the question
+
+### Methods and Results
+
+``` r
+bike <- fetch_ucirepo(id = 275)
+bike_data <- bike$data$original
+bike_data <- bike_data %>%
+  select(-instant, -dteday)
+bike_data <- bike_data %>%
+  mutate(weathersit = as.factor(weathersit))
+bike_data <- bike_data %>%
+  mutate(cnt = as.numeric(cnt))
+write_csv(bike_data, "../dsci-310-group-16/data/bike_data.csv")
+```
+
+``` r
+summary(bike_data)
+```
+
+    ##      season            yr              mnth              hr       
+    ##  Min.   :1.000   Min.   :0.0000   Min.   : 1.000   Min.   : 0.00  
+    ##  1st Qu.:2.000   1st Qu.:0.0000   1st Qu.: 4.000   1st Qu.: 6.00  
+    ##  Median :3.000   Median :1.0000   Median : 7.000   Median :12.00  
+    ##  Mean   :2.502   Mean   :0.5026   Mean   : 6.538   Mean   :11.55  
+    ##  3rd Qu.:3.000   3rd Qu.:1.0000   3rd Qu.:10.000   3rd Qu.:18.00  
+    ##  Max.   :4.000   Max.   :1.0000   Max.   :12.000   Max.   :23.00  
+    ##     holiday           weekday        workingday     weathersit      temp      
+    ##  Min.   :0.00000   Min.   :0.000   Min.   :0.0000   1:11413    Min.   :0.020  
+    ##  1st Qu.:0.00000   1st Qu.:1.000   1st Qu.:0.0000   2: 4544    1st Qu.:0.340  
+    ##  Median :0.00000   Median :3.000   Median :1.0000   3: 1419    Median :0.500  
+    ##  Mean   :0.02877   Mean   :3.004   Mean   :0.6827   4:    3    Mean   :0.497  
+    ##  3rd Qu.:0.00000   3rd Qu.:5.000   3rd Qu.:1.0000              3rd Qu.:0.660  
+    ##  Max.   :1.00000   Max.   :6.000   Max.   :1.0000              Max.   :1.000  
+    ##      atemp             hum           windspeed          casual      
+    ##  Min.   :0.0000   Min.   :0.0000   Min.   :0.0000   Min.   :  0.00  
+    ##  1st Qu.:0.3333   1st Qu.:0.4800   1st Qu.:0.1045   1st Qu.:  4.00  
+    ##  Median :0.4848   Median :0.6300   Median :0.1940   Median : 17.00  
+    ##  Mean   :0.4758   Mean   :0.6272   Mean   :0.1901   Mean   : 35.68  
+    ##  3rd Qu.:0.6212   3rd Qu.:0.7800   3rd Qu.:0.2537   3rd Qu.: 48.00  
+    ##  Max.   :1.0000   Max.   :1.0000   Max.   :0.8507   Max.   :367.00  
+    ##    registered         cnt       
+    ##  Min.   :  0.0   Min.   :  1.0  
+    ##  1st Qu.: 34.0   1st Qu.: 40.0  
+    ##  Median :115.0   Median :142.0  
+    ##  Mean   :153.8   Mean   :189.5  
+    ##  3rd Qu.:220.0   3rd Qu.:281.0  
+    ##  Max.   :886.0   Max.   :977.0
+
+``` r
+head(bike_data)
+```
+
+    ##   season yr mnth hr holiday weekday workingday weathersit temp  atemp  hum
+    ## 1      1  0    1  0       0       6          0          1 0.24 0.2879 0.81
+    ## 2      1  0    1  1       0       6          0          1 0.22 0.2727 0.80
+    ## 3      1  0    1  2       0       6          0          1 0.22 0.2727 0.80
+    ## 4      1  0    1  3       0       6          0          1 0.24 0.2879 0.75
+    ## 5      1  0    1  4       0       6          0          1 0.24 0.2879 0.75
+    ## 6      1  0    1  5       0       6          0          2 0.24 0.2576 0.75
+    ##   windspeed casual registered cnt
+    ## 1    0.0000      3         13  16
+    ## 2    0.0000      8         32  40
+    ## 3    0.0000      5         27  32
+    ## 4    0.0000      3         10  13
+    ## 5    0.0000      0          1   1
+    ## 6    0.0896      0          1   1
+
+``` r
+sum(is.na(bike_data))
+```
+
+    ## [1] 0
+
+``` r
+total_rentals = ggplot(bike_data,aes(x = cnt))+
+geom_histogram(binwidth = 10, fill = "blue",color = "black",alpha = 0.7)+
+labs(title = "Histogram of the total bike rentals", x = "Total rentals")
+
+cor(bike_data %>% select(temp, atemp, hum, windspeed, casual, registered, cnt))
+```
+
+    ##                   temp       atemp         hum   windspeed      casual
+    ## temp        1.00000000  0.98767214 -0.06988139 -0.02312526  0.45961565
+    ## atemp       0.98767214  1.00000000 -0.05191770 -0.06233604  0.45408007
+    ## hum        -0.06988139 -0.05191770  1.00000000 -0.29010490 -0.34702809
+    ## windspeed  -0.02312526 -0.06233604 -0.29010490  1.00000000  0.09028678
+    ## casual      0.45961565  0.45408007 -0.34702809  0.09028678  1.00000000
+    ## registered  0.33536085  0.33255864 -0.27393312  0.08232085  0.50661770
+    ## cnt         0.40477228  0.40092930 -0.32291074  0.09323378  0.69456408
+    ##             registered         cnt
+    ## temp        0.33536085  0.40477228
+    ## atemp       0.33255864  0.40092930
+    ## hum        -0.27393312 -0.32291074
+    ## windspeed   0.08232085  0.09323378
+    ## casual      0.50661770  0.69456408
+    ## registered  1.00000000  0.97215073
+    ## cnt         0.97215073  1.00000000
+
+``` r
+temp_vs_rentals = ggplot(bike_data, aes(x = temp, y = cnt)) +
+  geom_point(color = "blue", alpha = 0.5) +
+  theme_minimal() +
+  labs(title = "Temperature vs Bike Rentals", x = "Temperature", y = "Total Bike Rentals")
+
+
+weather_vs_cnt = ggplot(bike_data, aes(x = factor(weathersit), y = cnt, fill = factor(weathersit))) +
+  geom_bar(stat = "identity") +
+  scale_x_discrete(labels=c("Clear/Partly Cloudy", "Mist and Cloudy", "Light Percipitation", "Heavy Percipitation")) +
+  labs(title = "Bike Rentals by Weather Situation", x = "Weather Situation", y = "Total Bike Rentals") +
+  theme_minimal()
+
+
+season_vs_cnt = ggplot(bike_data, aes(x = factor(season), y = cnt)) +
+  geom_boxplot(fill = "lightgreen", color = "black", alpha = 0.7) +
+  theme_minimal() +
+  labs(title = "Bike Rentals by Season", x = "Season", y = "Total Bike Rentals")
+
+weekday_rental = ggplot(bike_data, aes(x = factor(weekday), y = cnt, fill = factor(weekday))) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
+  scale_fill_viridis_d() +
+  scale_x_discrete(labels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")) +
+  labs(title = "Bike Rentals by Weekday", x = "Weekday", y = "Total Bike Rentals") +
+  theme_minimal()
+
+humidty_rental = ggplot(bike_data, aes(x = hum, y = cnt)) +
+  geom_point(color = "purple", alpha = 0.5) +
+  theme_minimal() +
+  labs(title = "Humidity vs Bike Rentals", x = "Humidity", y = "Total Bike Rentals")
+
+wind_rental = ggplot(bike_data, aes(x = windspeed, y = cnt)) +
+  geom_point(color = "green", alpha = 0.5) +
+  theme_minimal() +
+  labs(title = "Windspeed vs Bike Rentals", x = "Wind Speed", y = "Total Bike Rentals")
+
+options(repr.plot.width=12)
+ggarrange(temp_vs_rentals, weather_vs_cnt, season_vs_cnt, weekday_rental, humidty_rental, wind_rental)
+```
+
+![](bike_analysis_files/figure-gfm/exploratory%20analysis-1.png)<!-- -->
+
+``` r
+total_rentals
+```
+
+![](bike_analysis_files/figure-gfm/exploratory%20analysis-2.png)<!-- -->
+
+``` r
+bike_split <- initial_split(bike_data, prop = 0.75, strata = cnt)
+bike_train <- training(bike_split)
+bike_test <- testing(bike_split)
+
+bike_train_summary <- bike_train |> 
+    summarize(median_cnt = median(cnt, na.rm = TRUE),
+             mean_cnt = mean(cnt, na.rm = TRUE),
+             standard_deviation_cnt = sd(cnt, na.rm = TRUE))
+
+bike_test_summary <- bike_test |> 
+    summarize(median_cnt = median(cnt, na.rm = TRUE),
+             mean_cnt = mean(cnt, na.rm = TRUE),
+             standard_deviation_cnt = sd(cnt, na.rm = TRUE))
+
+bike_tt_summary <- bind_rows(bike_train_summary, bike_test_summary) |>
+    mutate(partition = c("Train", "Test"),
+           fraction = c(0.8, 0.2))|> 
+    relocate(partition, fraction)
+
+best_models <- regsubsets(log(cnt)~ season + holiday + workingday + weathersit + temp + hum + windspeed, data = bike_train, nvmax = 11)
+
+res.sum <- summary(best_models)
+res.sum
+```
+
+    ## Subset selection object
+    ## Call: regsubsets.formula(log(cnt) ~ season + holiday + workingday + 
+    ##     weathersit + temp + hum + windspeed, data = bike_train, nvmax = 11)
+    ## 9 Variables  (and intercept)
+    ##             Forced in Forced out
+    ## season          FALSE      FALSE
+    ## holiday         FALSE      FALSE
+    ## workingday      FALSE      FALSE
+    ## weathersit2     FALSE      FALSE
+    ## weathersit3     FALSE      FALSE
+    ## weathersit4     FALSE      FALSE
+    ## temp            FALSE      FALSE
+    ## hum             FALSE      FALSE
+    ## windspeed       FALSE      FALSE
+    ## 1 subsets of each size up to 9
+    ## Selection Algorithm: exhaustive
+    ##          season holiday workingday weathersit2 weathersit3 weathersit4 temp hum
+    ## 1  ( 1 ) " "    " "     " "        " "         " "         " "         "*"  " "
+    ## 2  ( 1 ) " "    " "     " "        " "         " "         " "         "*"  "*"
+    ## 3  ( 1 ) "*"    " "     " "        " "         " "         " "         "*"  "*"
+    ## 4  ( 1 ) "*"    " "     " "        "*"         " "         " "         "*"  "*"
+    ## 5  ( 1 ) "*"    " "     " "        "*"         " "         " "         "*"  "*"
+    ## 6  ( 1 ) "*"    "*"     " "        "*"         " "         " "         "*"  "*"
+    ## 7  ( 1 ) "*"    "*"     "*"        "*"         " "         " "         "*"  "*"
+    ## 8  ( 1 ) "*"    "*"     "*"        "*"         " "         "*"         "*"  "*"
+    ## 9  ( 1 ) "*"    "*"     "*"        "*"         "*"         "*"         "*"  "*"
+    ##          windspeed
+    ## 1  ( 1 ) " "      
+    ## 2  ( 1 ) " "      
+    ## 3  ( 1 ) " "      
+    ## 4  ( 1 ) " "      
+    ## 5  ( 1 ) "*"      
+    ## 6  ( 1 ) "*"      
+    ## 7  ( 1 ) "*"      
+    ## 8  ( 1 ) "*"      
+    ## 9  ( 1 ) "*"
+
+``` r
+data.frame(
+  R2 = which.max(res.sum$rsq),
+  Adj.R2 = which.max(res.sum$adjr2)
+)
+```
+
+    ##   R2 Adj.R2
+    ## 1  9      9
+
+``` r
+bike_model_with_weather = lm(log(cnt) ~ season + holiday + workingday + weathersit + temp + hum + windspeed, data = bike_train)
+res_with <- summary(bike_model_with_weather)
+bike_model_no_weather = lm(log(cnt) ~ season + holiday + workingday + temp + hum + windspeed, data = bike_train)
+res_no <- summary(bike_model_no_weather)
+data.frame(
+  Adj.R2_with = res_with$adj.r.squared,
+  Adj.R2_without = res_no$adj.r.squared
+)
+```
+
+    ##   Adj.R2_with Adj.R2_without
+    ## 1    0.264065      0.2578714
+
+``` r
+final_bike_model = bike_model_with_weather
+tidy(final_bike_model)
+```
+
+    ## # A tibble: 10 × 5
+    ##    term        estimate std.error statistic   p.value
+    ##    <chr>          <dbl>     <dbl>     <dbl>     <dbl>
+    ##  1 (Intercept)   4.40      0.0633     69.5  0        
+    ##  2 season        0.162     0.0109     14.9  1.34e- 49
+    ##  3 holiday      -0.204     0.0681     -3.00 2.70e-  3
+    ##  4 workingday   -0.0595    0.0249     -2.39 1.70e-  2
+    ##  5 weathersit2   0.283     0.0271     10.4  2.69e- 25
+    ##  6 weathersit3   0.0748    0.0450      1.66 9.66e-  2
+    ##  7 weathersit4   1.57      0.902       1.74 8.11e-  2
+    ##  8 temp          2.55      0.0619     41.2  0        
+    ##  9 hum          -2.65      0.0686    -38.7  1.01e-309
+    ## 10 windspeed     0.502     0.0978      5.14 2.85e-  7
+
+``` r
+ggplot(bike_train,aes(x= fitted(final_bike_model),y = residuals(final_bike_model)))+
+geom_point(alpha = 0.5)+
+geom_hline(yintercept = 0,linetype = 'dashed',color = "red")+
+labs(title = "Residual plot", x = "Fitted values", y = "Residuals")
+```
+
+![](bike_analysis_files/figure-gfm/test%20final%20model-1.png)<!-- -->
+
+``` r
+predictions = predict(final_bike_model, newdata = bike_test)
+RMSE = rmse(preds = predictions, actuals = log(bike_test$cnt))
+RMSE
+```
+
+    ## [1] 1.271976

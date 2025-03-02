@@ -14,6 +14,7 @@ library(ggplot2)
 library(ucimlrepo)
 library(leaps)
 library(mltools)
+library(ggpubr)
 ```
 
 ## Predicting Bike Rental Demand Using Regression Analysis
