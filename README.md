@@ -2,9 +2,7 @@
 
 #Contributors
 
-Arya Sardesai
-Annmarie Thomson
-Christina Zhang
+Arya Sardesai,Annmarie Thomson,Christina Zhang
 
 
 #Project Overview
