@@ -93,7 +93,7 @@ their influence on bike usage.
 
 ### Introduction
 
-Bike-sharing systems are a growing compotonent of urban design (Winters,
+Bike-sharing systems are a growing component of urban design (Winters,
 2020), providing an eco-friendly, convenient, and healthy alternative to
 traditional transient or driving. Building understanding around the
 factors that drive bike-share demand can help urban designers improve
@@ -107,8 +107,21 @@ factors affect bike-sharing demand?
 
 ### Methods and Results
 
+| Predictor Variable | Description |
+|----|----|
+| season | Season that the bike is rented in |
+| holiday | If the day the bike was rented is a holiday |
+| workingday | If the day the bike was rented is a work day |
+| weathersit | What the weather was on the day the bike was rented |
+| temp | What the temperature was on the day the bike was rented |
+| hum | What the humidity was on the day the bike was rented |
+| windspeed | What the windsped was on the day the bike was rented |
+
+**Table 1.** Predictor variables used for analysis
+
 Our dataset was loaded and cleaned by ensuring correct factorization and
-removing irrelevant columns
+removing irrelevant columns. We had no missing data or special
+characters so we did not have to worry about that.
 
 ``` r
 bike <- fetch_ucirepo(id = 275)
@@ -132,68 +145,61 @@ want to maintain the assumption of normality, moving forward we will be
 using a log transformation on the cnt variable.
 
 ``` r
-summary(bike_data)
-```
-
-    ##      season            yr              mnth              hr       
-    ##  Min.   :1.000   Min.   :0.0000   Min.   : 1.000   Min.   : 0.00  
-    ##  1st Qu.:2.000   1st Qu.:0.0000   1st Qu.: 4.000   1st Qu.: 6.00  
-    ##  Median :3.000   Median :1.0000   Median : 7.000   Median :12.00  
-    ##  Mean   :2.502   Mean   :0.5026   Mean   : 6.538   Mean   :11.55  
-    ##  3rd Qu.:3.000   3rd Qu.:1.0000   3rd Qu.:10.000   3rd Qu.:18.00  
-    ##  Max.   :4.000   Max.   :1.0000   Max.   :12.000   Max.   :23.00  
-    ##     holiday           weekday        workingday     weathersit      temp      
-    ##  Min.   :0.00000   Min.   :0.000   Min.   :0.0000   1:11413    Min.   :0.020  
-    ##  1st Qu.:0.00000   1st Qu.:1.000   1st Qu.:0.0000   2: 4544    1st Qu.:0.340  
-    ##  Median :0.00000   Median :3.000   Median :1.0000   3: 1419    Median :0.500  
-    ##  Mean   :0.02877   Mean   :3.004   Mean   :0.6827   4:    3    Mean   :0.497  
-    ##  3rd Qu.:0.00000   3rd Qu.:5.000   3rd Qu.:1.0000              3rd Qu.:0.660  
-    ##  Max.   :1.00000   Max.   :6.000   Max.   :1.0000              Max.   :1.000  
-    ##      atemp             hum           windspeed          casual      
-    ##  Min.   :0.0000   Min.   :0.0000   Min.   :0.0000   Min.   :  0.00  
-    ##  1st Qu.:0.3333   1st Qu.:0.4800   1st Qu.:0.1045   1st Qu.:  4.00  
-    ##  Median :0.4848   Median :0.6300   Median :0.1940   Median : 17.00  
-    ##  Mean   :0.4758   Mean   :0.6272   Mean   :0.1901   Mean   : 35.68  
-    ##  3rd Qu.:0.6212   3rd Qu.:0.7800   3rd Qu.:0.2537   3rd Qu.: 48.00  
-    ##  Max.   :1.0000   Max.   :1.0000   Max.   :0.8507   Max.   :367.00  
-    ##    registered         cnt       
-    ##  Min.   :  0.0   Min.   :  1.0  
-    ##  1st Qu.: 34.0   1st Qu.: 40.0  
-    ##  Median :115.0   Median :142.0  
-    ##  Mean   :153.8   Mean   :189.5  
-    ##  3rd Qu.:220.0   3rd Qu.:281.0  
-    ##  Max.   :886.0   Max.   :977.0
-
-``` r
-head(bike_data)
-```
-
-    ##   season yr mnth hr holiday weekday workingday weathersit temp  atemp  hum
-    ## 1      1  0    1  0       0       6          0          1 0.24 0.2879 0.81
-    ## 2      1  0    1  1       0       6          0          1 0.22 0.2727 0.80
-    ## 3      1  0    1  2       0       6          0          1 0.22 0.2727 0.80
-    ## 4      1  0    1  3       0       6          0          1 0.24 0.2879 0.75
-    ## 5      1  0    1  4       0       6          0          1 0.24 0.2879 0.75
-    ## 6      1  0    1  5       0       6          0          2 0.24 0.2576 0.75
-    ##   windspeed casual registered cnt
-    ## 1    0.0000      3         13  16
-    ## 2    0.0000      8         32  40
-    ## 3    0.0000      5         27  32
-    ## 4    0.0000      3         10  13
-    ## 5    0.0000      0          1   1
-    ## 6    0.0896      0          1   1
-
-``` r
-sum(is.na(bike_data))
-```
-
-    ## [1] 0
-
-``` r
 total_rentals = ggplot(bike_data,aes(x = cnt))+
 geom_histogram(binwidth = 10, fill = "blue",color = "black",alpha = 0.7)+
 labs(title = "Histogram of the total bike rentals", x = "Total rentals")
 
+temp_vs_rentals = ggplot(bike_data, aes(x = temp, y = cnt)) +
+  geom_point(color = "blue", alpha = 0.5) +
+  theme_minimal() +
+  labs(title = "Temperature vs Bike Rentals", x = "Temperature", y = "Total Bike Rentals")
+
+
+weather_vs_cnt = ggplot(bike_data, aes(x = factor(weathersit), y = cnt, fill = factor(weathersit))) +
+  geom_bar(stat = "identity") +
+  scale_x_discrete(labels=c("Clear/Partly Cloudy", "Mist and Cloudy", "Light Percipitation", "Heavy Percipitation")) +
+  labs(title = "Bike Rentals by \nWeather Situation", x = "Weather Situation", y = "Total Bike Rentals") +
+  theme(axis.text.x = element_text(angle = 70, vjust = 0.5))
+
+
+season_vs_cnt = ggplot(bike_data, aes(x = factor(season), y = cnt)) +
+  geom_boxplot(fill = "lightgreen", color = "black", alpha = 0.7) +
+  labs(title = "Bike Rentals by Season", x = "Season", y = "Total Bike Rentals")
+
+weekday_rental = ggplot(bike_data, aes(x = factor(weekday), y = cnt, fill = factor(weekday))) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
+  scale_fill_viridis_d() +
+  scale_x_discrete(labels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")) +
+  labs(title = "Bike Rentals by Weekday", x = "Weekday", y = "Total Bike Rentals") +
+  theme(axis.text.x = element_text(angle = 70, vjust = 0.5))
+
+humidty_rental = ggplot(bike_data, aes(x = hum, y = cnt)) +
+  geom_point(color = "purple", alpha = 0.5) +
+  labs(title = "Humidity vs Bike Rentals", x = "Humidity", y = "Total Bike Rentals") +
+  theme(axis.text.x = element_text(angle = 70, vjust = 0.5))
+
+wind_rental = ggplot(bike_data, aes(x = windspeed, y = cnt)) +
+  geom_point(color = "green", alpha = 0.5) +
+  theme_minimal() +
+  labs(title = "Windspeed vs Bike Rentals", x = "Wind Speed", y = "Total Bike Rentals")
+
+
+ggarrange(temp_vs_rentals, weather_vs_cnt, season_vs_cnt, weekday_rental, humidty_rental, wind_rental)
+```
+
+![](bike_analysis_files/figure-gfm/exploratory%20analysis-1.png)<!-- -->
+
+**Figure 1.** Distributions of dependent variables vs bike rental counts
+
+``` r
+total_rentals
+```
+
+![](bike_analysis_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+
+**Figure 2.** Distribution of bike rental counts
+
+``` r
 cor(bike_data %>% select(temp, atemp, hum, windspeed, casual, registered, cnt))
 ```
 
@@ -214,57 +220,7 @@ cor(bike_data %>% select(temp, atemp, hum, windspeed, casual, registered, cnt))
     ## registered  1.00000000  0.97215073
     ## cnt         0.97215073  1.00000000
 
-``` r
-temp_vs_rentals = ggplot(bike_data, aes(x = temp, y = cnt)) +
-  geom_point(color = "blue", alpha = 0.5) +
-  theme_minimal() +
-  labs(title = "Temperature vs Bike Rentals", x = "Temperature", y = "Total Bike Rentals")
-
-
-weather_vs_cnt = ggplot(bike_data, aes(x = factor(weathersit), y = cnt, fill = factor(weathersit))) +
-  geom_bar(stat = "identity") +
-  scale_x_discrete(labels=c("Clear/Partly Cloudy", "Mist and Cloudy", "Light Percipitation", "Heavy Percipitation")) +
-  labs(title = "Bike Rentals by Weather Situation", x = "Weather Situation", y = "Total Bike Rentals") +
-  theme_minimal()
-
-
-season_vs_cnt = ggplot(bike_data, aes(x = factor(season), y = cnt)) +
-  geom_boxplot(fill = "lightgreen", color = "black", alpha = 0.7) +
-  theme_minimal() +
-  labs(title = "Bike Rentals by Season", x = "Season", y = "Total Bike Rentals")
-
-weekday_rental = ggplot(bike_data, aes(x = factor(weekday), y = cnt, fill = factor(weekday))) +
-  geom_bar(stat = "identity", show.legend = FALSE) +
-  scale_fill_viridis_d() +
-  scale_x_discrete(labels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")) +
-  labs(title = "Bike Rentals by Weekday", x = "Weekday", y = "Total Bike Rentals") +
-  theme_minimal()
-
-humidty_rental = ggplot(bike_data, aes(x = hum, y = cnt)) +
-  geom_point(color = "purple", alpha = 0.5) +
-  theme_minimal() +
-  labs(title = "Humidity vs Bike Rentals", x = "Humidity", y = "Total Bike Rentals")
-
-wind_rental = ggplot(bike_data, aes(x = windspeed, y = cnt)) +
-  geom_point(color = "green", alpha = 0.5) +
-  theme_minimal() +
-  labs(title = "Windspeed vs Bike Rentals", x = "Wind Speed", y = "Total Bike Rentals")
-
-options(repr.plot.width=20)
-ggarrange(temp_vs_rentals, weather_vs_cnt, season_vs_cnt, weekday_rental, humidty_rental, wind_rental)
-```
-
-![](bike_analysis_files/figure-gfm/exploratory%20analysis-1.png)<!-- -->
-
-**Figure 1.** Distributions of dependent variables vs bike rental counts
-
-``` r
-total_rentals
-```
-
-![](bike_analysis_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
-
-**Figure 2.** Distribution of bike rental counts
+**Figure 3.** Correlation matrix of prediction variables
 
 The data was split into training (75%) and testing (25%) sets,
 stratified by cnt (total bike counts). To ensure we had enough data
@@ -297,7 +253,7 @@ bike_tt_summary
     ## 1     Train      0.8        142 189.8049               181.6294
     ## 2      Test      0.2        142 188.4385               180.6777
 
-**Table 1.** Summary statistics for response variable (cnt) for each
+**Table 2.** Summary statistics for response variable (cnt) for each
 data split.
 
 To determine the most appropriate model, we used the best subset
@@ -319,7 +275,7 @@ data.frame(
     ##   R2 Adj.R2
     ## 1  9      9
 
-**Table 2.** Model with largest R<sup>2</sup> and adjusted R<sup>2</sup>
+**Table 3.** Model with largest R<sup>2</sup> and adjusted R<sup>2</sup>
 
 We created two linear regression models with and without weather
 respecively to assess their impact on bike demand. Because the model
@@ -340,7 +296,7 @@ data.frame(
     ##   Adj.R2_with Adj.R2_without
     ## 1    0.264065      0.2578714
 
-**Table 3.** Comparing model with and without weather
+**Table 4.** Comparing model with and without weather
 
 ``` r
 final_bike_model = bike_model_with_weather
@@ -361,7 +317,7 @@ tidy(final_bike_model)
     ##  9 hum          -2.65      0.0686    -38.7  1.01e-309
     ## 10 windspeed     0.502     0.0978      5.14 2.85e-  7
 
-**Table 4.** Final model summary
+**Table 5.** Final model summary
 
 To assess the model fit, we generated a residual plot. This plot
 indicates that even with our log transformation, the residuals are a bit
@@ -377,7 +333,7 @@ labs(title = "Residual plot", x = "Fitted values", y = "Residuals")
 
 ![](bike_analysis_files/figure-gfm/test%20final%20model-1.png)<!-- -->
 
-**Figure 3.** Residual plot of final model
+**Figure 4.** Residual plot of final model
 
 Finally, to evaluate prediction accuracy we calculated RMSE, which we
 found to be 1.29 uses approximately, suggesting the model prediction is
@@ -392,7 +348,7 @@ data.frame(RMSE)
     ##       RMSE
     ## 1 1.271976
 
-**Table 5.** RMSE
+**Table 6.** RMSE of our linear model
 
 ### Discussion
 

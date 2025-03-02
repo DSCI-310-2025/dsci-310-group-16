@@ -25,11 +25,23 @@ In our project, we will attempt to build a regression model using best subset se
 
 ### Introduction
 
-Bike-sharing systems are a growing compotonent of urban design (Winters, 2020), providing an eco-friendly, convenient, and healthy alternative to traditional transient or driving. Building understanding around the factors that drive bike-share demand can help urban designers improve bike services. The dataset we used to form our regression is the Bike Sharing Dataset (dataset ID: 275) from the UCI Machine Learning Repository, which you can find at <https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset>. It contains information on bike rentals, weather, and time-related features. Our research question: How do environmental and temporal factors affect bike-sharing demand?
+Bike-sharing systems are a growing component of urban design (Winters, 2020), providing an eco-friendly, convenient, and healthy alternative to traditional transient or driving. Building understanding around the factors that drive bike-share demand can help urban designers improve bike services. The dataset we used to form our regression is the Bike Sharing Dataset (dataset ID: 275) from the UCI Machine Learning Repository, which you can find at <https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset>. It contains information on bike rentals, weather, and time-related features. Our research question: How do environmental and temporal factors affect bike-sharing demand?
 
 ### Methods and Results
 
-Our dataset was loaded and cleaned by ensuring correct factorization and removing irrelevant columns
+| Predictor Variable | Description |
+|-----------------------|-------------------------------------------------|
+| season | Season that the bike is rented in |
+| holiday | If the day the bike was rented is a holiday |
+| workingday | If the day the bike was rented is a work day |
+| weathersit | What the weather was on the day the bike was rented |
+| temp | What the temperature was on the day the bike was rented |
+| hum | What the humidity was on the day the bike was rented |
+| windspeed | What the windsped was on the day the bike was rented |
+
+**Table 1.** Predictor variables used for analysis
+
+Our dataset was loaded and cleaned by ensuring correct factorization and removing irrelevant columns. We had no missing data or special characters so we did not have to worry about that.
 
 ```{r read and clean data}
 bike <- fetch_ucirepo(id = 275)
@@ -45,19 +57,11 @@ write_csv(bike_data, "../dsci-310-group-16/data/bike_data.csv")
 
 In our exploratory analysis, we looked to see how dependent variables affected bike rental usage. We also made a correlation matrix to explore how correlated our variables are. We found multicollinearity between atemp and temp, so moving forward we will use temp in our analysis. Finally, we found that the distribution of bike rental counts was heavily right skewed. Because we plan to use linear regression and we want to maintain the assumption of normality, moving forward we will be using a log transformation on the cnt variable.
 
-```{}
-```
-
-```{r exploratory analysis}
-summary(bike_data)
-head(bike_data)
-sum(is.na(bike_data))
+```{r exploratory analysis, fig.width=10, fig.height=10}
 
 total_rentals = ggplot(bike_data,aes(x = cnt))+
 geom_histogram(binwidth = 10, fill = "blue",color = "black",alpha = 0.7)+
 labs(title = "Histogram of the total bike rentals", x = "Total rentals")
-
-cor(bike_data %>% select(temp, atemp, hum, windspeed, casual, registered, cnt))
 
 temp_vs_rentals = ggplot(bike_data, aes(x = temp, y = cnt)) +
   geom_point(color = "blue", alpha = 0.5) +
@@ -68,13 +72,12 @@ temp_vs_rentals = ggplot(bike_data, aes(x = temp, y = cnt)) +
 weather_vs_cnt = ggplot(bike_data, aes(x = factor(weathersit), y = cnt, fill = factor(weathersit))) +
   geom_bar(stat = "identity") +
   scale_x_discrete(labels=c("Clear/Partly Cloudy", "Mist and Cloudy", "Light Percipitation", "Heavy Percipitation")) +
-  labs(title = "Bike Rentals by Weather Situation", x = "Weather Situation", y = "Total Bike Rentals") +
-  theme_minimal()
+  labs(title = "Bike Rentals by \nWeather Situation", x = "Weather Situation", y = "Total Bike Rentals") +
+  theme(axis.text.x = element_text(angle = 70, vjust = 0.5))
 
 
 season_vs_cnt = ggplot(bike_data, aes(x = factor(season), y = cnt)) +
   geom_boxplot(fill = "lightgreen", color = "black", alpha = 0.7) +
-  theme_minimal() +
   labs(title = "Bike Rentals by Season", x = "Season", y = "Total Bike Rentals")
 
 weekday_rental = ggplot(bike_data, aes(x = factor(weekday), y = cnt, fill = factor(weekday))) +
@@ -82,19 +85,19 @@ weekday_rental = ggplot(bike_data, aes(x = factor(weekday), y = cnt, fill = fact
   scale_fill_viridis_d() +
   scale_x_discrete(labels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")) +
   labs(title = "Bike Rentals by Weekday", x = "Weekday", y = "Total Bike Rentals") +
-  theme_minimal()
+  theme(axis.text.x = element_text(angle = 70, vjust = 0.5))
 
 humidty_rental = ggplot(bike_data, aes(x = hum, y = cnt)) +
   geom_point(color = "purple", alpha = 0.5) +
-  theme_minimal() +
-  labs(title = "Humidity vs Bike Rentals", x = "Humidity", y = "Total Bike Rentals")
+  labs(title = "Humidity vs Bike Rentals", x = "Humidity", y = "Total Bike Rentals") +
+  theme(axis.text.x = element_text(angle = 70, vjust = 0.5))
 
 wind_rental = ggplot(bike_data, aes(x = windspeed, y = cnt)) +
   geom_point(color = "green", alpha = 0.5) +
   theme_minimal() +
   labs(title = "Windspeed vs Bike Rentals", x = "Wind Speed", y = "Total Bike Rentals")
 
-options(repr.plot.width=20)
+
 ggarrange(temp_vs_rentals, weather_vs_cnt, season_vs_cnt, weekday_rental, humidty_rental, wind_rental)
 
 ```
@@ -106,6 +109,13 @@ total_rentals
 ```
 
 **Figure 2.** Distribution of bike rental counts
+
+```{r}
+cor(bike_data %>% select(temp, atemp, hum, windspeed, casual, registered, cnt))
+
+```
+
+**Figure 3.** Correlation matrix of prediction variables
 
 The data was split into training (75%) and testing (25%) sets, stratified by cnt (total bike counts). To ensure we had enough data representation in the test set, we computed the median, mean, and standard deviation for both data sets to make sure they were similar.
 
@@ -132,7 +142,7 @@ bike_tt_summary
 
 ```
 
-**Table 1.** Summary statistics for response variable (cnt) for each data split.
+**Table 2.** Summary statistics for response variable (cnt) for each data split.
 
 To determine the most appropriate model, we used the best subset framework. Because weather is a categorical variable, we needed to check if the model with or without weather did better to determine our final model.
 
@@ -147,7 +157,7 @@ data.frame(
 )
 ```
 
-**Table 2.** Model with largest R^2^ and adjusted R^2^
+**Table 3.** Model with largest R^2^ and adjusted R^2^
 
 We created two linear regression models with and without weather respecively to assess their impact on bike demand. Because the model that included weather had a higher adjusted R^2^ , we decided to use that model as our final regression model.
 
@@ -163,14 +173,14 @@ data.frame(
 
 ```
 
-**Table 3.** Comparing model with and without weather
+**Table 4.** Comparing model with and without weather
 
 ```{r}
 final_bike_model = bike_model_with_weather
 tidy(final_bike_model)
 ```
 
-**Table 4.** Final model summary
+**Table 5.** Final model summary
 
 To assess the model fit, we generated a residual plot. This plot indicates that even with our log transformation, the residuals are a bit heteroscedastic, and in future renditions of this project we plan to adopt a different, more appropriate model.
 
@@ -182,7 +192,7 @@ labs(title = "Residual plot", x = "Fitted values", y = "Residuals")
 
 ```
 
-**Figure 3.** Residual plot of final model
+**Figure 4.** Residual plot of final model
 
 Finally, to evaluate prediction accuracy we calculated RMSE, which we found to be 1.29 uses approximately, suggesting the model prediction is good and our model is useful.
 
@@ -192,7 +202,7 @@ RMSE = rmse(preds = predictions, actuals = log(bike_test$cnt))
 data.frame(RMSE)
 ```
 
-**Table 5.** RMSE
+**Table 6.** RMSE of our linear model
 
 ### Discussion
 
