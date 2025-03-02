@@ -1,6 +1,6 @@
 Predicting Bike Rental Demand Using Regression Analysis
 ================
-Annmarie Thomson, Arya Sardesai, Christina Zhang
+Annmarie Thomson
 2025-1-3
 
 ``` r
@@ -86,17 +86,29 @@ library(ggpubr)
 
 ### Summary
 
+In our project, we will attempt to build a regression model using best
+subset selection to analyze bike-sharing data to predict rental demand.
+We will examine factors like weather, time, and holidays to understand
+their influence on bike usage.
+
 ### Introduction
 
-- provide some relevant background information on the topic so that
-  someone unfamiliar with it will be prepared to understand the rest of
-  your report
-
-- clearly state the question you tried to answer with your project
-
-- identify and describe the dataset that was used to answer the question
+Bike-sharing systems are a growing compotonent of urban design (Winters,
+2020), providing an eco-friendly, convenient, and healthy alternative to
+traditional transient or driving. Building understanding around the
+factors that drive bike-share demand can help urban designers improve
+bike services. The dataset we used to form our regression is the Bike
+Sharing Dataset (dataset ID: 275) from the UCI Machine Learning
+Repository, which you can find at
+<https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset>. It
+contains information on bike rentals, weather, and time-related
+features. Our research question: How do environmental and temporal
+factors affect bike-sharing demand?
 
 ### Methods and Results
+
+Our dataset was loaded and cleaned by ensuring correct factorization and
+removing irrelevant columns
 
 ``` r
 bike <- fetch_ucirepo(id = 275)
@@ -109,6 +121,15 @@ bike_data <- bike_data %>%
   mutate(cnt = as.numeric(cnt))
 write_csv(bike_data, "../dsci-310-group-16/data/bike_data.csv")
 ```
+
+In our exploratory analysis, we looked to see how dependent variables
+affected bike rental usage. We also made a correlation matrix to explore
+how correlated our variables are. We found multicollinearity between
+atemp and temp, so moving forward we will use temp in our analysis.
+Finally, we found that the distribution of bike rental counts was
+heavily right skewed. Because we plan to use linear regression and we
+want to maintain the assumption of normality, moving forward we will be
+using a log transformation on the cnt variable.
 
 ``` r
 summary(bike_data)
@@ -229,17 +250,26 @@ wind_rental = ggplot(bike_data, aes(x = windspeed, y = cnt)) +
   theme_minimal() +
   labs(title = "Windspeed vs Bike Rentals", x = "Wind Speed", y = "Total Bike Rentals")
 
-options(repr.plot.width=12)
+options(repr.plot.width=20)
 ggarrange(temp_vs_rentals, weather_vs_cnt, season_vs_cnt, weekday_rental, humidty_rental, wind_rental)
 ```
 
 ![](bike_analysis_files/figure-gfm/exploratory%20analysis-1.png)<!-- -->
 
+**Figure 1.** Distributions of dependent variables vs bike rental counts
+
 ``` r
 total_rentals
 ```
 
-![](bike_analysis_files/figure-gfm/exploratory%20analysis-2.png)<!-- -->
+![](bike_analysis_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+
+**Figure 2.** Distribution of bike rental counts
+
+The data was split into training (75%) and testing (25%) sets,
+stratified by cnt (total bike counts). To ensure we had enough data
+representation in the test set, we computed the median, mean, and
+standard deviation for both data sets to make sure they were similar.
 
 ``` r
 bike_split <- initial_split(bike_data, prop = 0.75, strata = cnt)
@@ -260,51 +290,26 @@ bike_tt_summary <- bind_rows(bike_train_summary, bike_test_summary) |>
     mutate(partition = c("Train", "Test"),
            fraction = c(0.8, 0.2))|> 
     relocate(partition, fraction)
+bike_tt_summary
+```
 
+    ##   partition fraction median_cnt mean_cnt standard_deviation_cnt
+    ## 1     Train      0.8        142 189.8049               181.6294
+    ## 2      Test      0.2        142 188.4385               180.6777
+
+**Table 1.** Summary statistics for response variable (cnt) for each
+data split.
+
+To determine the most appropriate model, we used the best subset
+framework. Because weather is a categorical variable, we needed to check
+if the model with or without weather did better to determine our final
+model.
+
+``` r
 best_models <- regsubsets(log(cnt)~ season + holiday + workingday + weathersit + temp + hum + windspeed, data = bike_train, nvmax = 11)
 
 res.sum <- summary(best_models)
-res.sum
-```
 
-    ## Subset selection object
-    ## Call: regsubsets.formula(log(cnt) ~ season + holiday + workingday + 
-    ##     weathersit + temp + hum + windspeed, data = bike_train, nvmax = 11)
-    ## 9 Variables  (and intercept)
-    ##             Forced in Forced out
-    ## season          FALSE      FALSE
-    ## holiday         FALSE      FALSE
-    ## workingday      FALSE      FALSE
-    ## weathersit2     FALSE      FALSE
-    ## weathersit3     FALSE      FALSE
-    ## weathersit4     FALSE      FALSE
-    ## temp            FALSE      FALSE
-    ## hum             FALSE      FALSE
-    ## windspeed       FALSE      FALSE
-    ## 1 subsets of each size up to 9
-    ## Selection Algorithm: exhaustive
-    ##          season holiday workingday weathersit2 weathersit3 weathersit4 temp hum
-    ## 1  ( 1 ) " "    " "     " "        " "         " "         " "         "*"  " "
-    ## 2  ( 1 ) " "    " "     " "        " "         " "         " "         "*"  "*"
-    ## 3  ( 1 ) "*"    " "     " "        " "         " "         " "         "*"  "*"
-    ## 4  ( 1 ) "*"    " "     " "        "*"         " "         " "         "*"  "*"
-    ## 5  ( 1 ) "*"    " "     " "        "*"         " "         " "         "*"  "*"
-    ## 6  ( 1 ) "*"    "*"     " "        "*"         " "         " "         "*"  "*"
-    ## 7  ( 1 ) "*"    "*"     "*"        "*"         " "         " "         "*"  "*"
-    ## 8  ( 1 ) "*"    "*"     "*"        "*"         " "         "*"         "*"  "*"
-    ## 9  ( 1 ) "*"    "*"     "*"        "*"         "*"         "*"         "*"  "*"
-    ##          windspeed
-    ## 1  ( 1 ) " "      
-    ## 2  ( 1 ) " "      
-    ## 3  ( 1 ) " "      
-    ## 4  ( 1 ) " "      
-    ## 5  ( 1 ) "*"      
-    ## 6  ( 1 ) "*"      
-    ## 7  ( 1 ) "*"      
-    ## 8  ( 1 ) "*"      
-    ## 9  ( 1 ) "*"
-
-``` r
 data.frame(
   R2 = which.max(res.sum$rsq),
   Adj.R2 = which.max(res.sum$adjr2)
@@ -313,6 +318,13 @@ data.frame(
 
     ##   R2 Adj.R2
     ## 1  9      9
+
+**Table 2.** Model with largest R<sup>2</sup> and adjusted R<sup>2</sup>
+
+We created two linear regression models with and without weather
+respecively to assess their impact on bike demand. Because the model
+that included weather had a higher adjusted R<sup>2</sup> , we decided
+to use that model as our final regression model.
 
 ``` r
 bike_model_with_weather = lm(log(cnt) ~ season + holiday + workingday + weathersit + temp + hum + windspeed, data = bike_train)
@@ -327,6 +339,8 @@ data.frame(
 
     ##   Adj.R2_with Adj.R2_without
     ## 1    0.264065      0.2578714
+
+**Table 3.** Comparing model with and without weather
 
 ``` r
 final_bike_model = bike_model_with_weather
@@ -347,6 +361,13 @@ tidy(final_bike_model)
     ##  9 hum          -2.65      0.0686    -38.7  1.01e-309
     ## 10 windspeed     0.502     0.0978      5.14 2.85e-  7
 
+**Table 4.** Final model summary
+
+To assess the model fit, we generated a residual plot. This plot
+indicates that even with our log transformation, the residuals are a bit
+heteroscedastic, and in future renditions of this project we plan to
+adopt a different, more appropriate model.
+
 ``` r
 ggplot(bike_train,aes(x= fitted(final_bike_model),y = residuals(final_bike_model)))+
 geom_point(alpha = 0.5)+
@@ -356,10 +377,56 @@ labs(title = "Residual plot", x = "Fitted values", y = "Residuals")
 
 ![](bike_analysis_files/figure-gfm/test%20final%20model-1.png)<!-- -->
 
+**Figure 3.** Residual plot of final model
+
+Finally, to evaluate prediction accuracy we calculated RMSE, which we
+found to be 1.29 uses approximately, suggesting the model prediction is
+good and our model is useful.
+
 ``` r
 predictions = predict(final_bike_model, newdata = bike_test)
 RMSE = rmse(preds = predictions, actuals = log(bike_test$cnt))
-RMSE
+data.frame(RMSE)
 ```
 
-    ## [1] 1.271976
+    ##       RMSE
+    ## 1 1.271976
+
+**Table 5.** RMSE
+
+### Discussion
+
+We found that the ideal model for our data includes season, holiday
+status, wether it is a working day, the temperature, the humidity, and
+the wind speed. We found that our model became stronger with the
+inclusion of weather-related variables. Though none of these findins are
+individually surprising, we were surprised that all of the variables had
+an impact on bike demand prediction and wonder if more research can be
+done into what other variables may also be used in this model. These
+findings suggest that these variables can significantly influence bike
+demand, information that can be used to help increase total users.
+
+Future Questions:
+
+Could a non-linear model be more accurate in terms of prediction?
+
+How do long-term weather trends affect the seasonal bike usage?
+
+What other outside variables are impactful in the prediction of
+bike-share usage?
+
+### **Citations**
+
+Teschke, K. (n.d.). *Bike share*. Cycling in Cities.
+<https://cyclingincities.spph.ubc.ca/motivating-cycling/bikeshare-systems/>
+
+R Core Team. 2019. R: *A Language and Environment for Statistical
+Computing.* Vienna, Austria: R Foundation for Statistical Computing.
+[https://www.R-project.org/](https://www.r-project.org/).
+
+Wickham H (2016). *ggplot2: Elegant Graphics for Data Analysis*.
+Springer-Verlag New York. ISBN
+978-3-319-24277-4, [https://ggplot2.tidyverse.org](https://ggplot2.tidyverse.org/).
+
+Fanaee-T, H. (2013). *Bike Sharing \[Dataset\]*. UCI Machine Learning
+Repository. <https://doi.org/10.24432/C5W894>.
