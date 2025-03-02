@@ -2,7 +2,7 @@
 
 # Contributors
 
-Arya Sardesai,Annmarie Thomson,Christina Zhang
+Annmarie Thomson, Arya Sardesai,Christina Zhang
 
 
 # Project Overview
@@ -16,65 +16,33 @@ Clone the repository:
 git clone https://github.com/DSCI-310-2025/dsci-310-group-16.git
 cd dsci-310-group-16
 
-# License
-
-This project is licensed under the terms specified in LICENSE.md.
-
-# Reproducible Computational Environment with Docker
-
-This project uses Docker to ensure a consistent and reproducible computing environment for analysis. All dependencies are containerized, eliminating system compatibility issues.
-
-- Dockerfile defines the environment.
-
-- GitHub Actions automates building and publishing the image to DockerHub.
-
-- Contributors can run the same environment on any system.
-
-#Install Docker
-
-Download & Install Docker
-
-Verify installation:
-
-docker --version
-
-#Run the Docker Container
-
-Pull and run the latest image from DockerHub:
-
-docker pull YOUR_DOCKER_USERNAME/dsci310-group-16:latest
-docker run --rm -it YOUR_DOCKER_USERNAME/dsci310-group-16 R
-
-Run an R script inside the container:
-
-docker run --rm -v $(pwd):/workspace -w /workspace YOUR_DOCKER_USERNAME/dsci310-group-16 Rscript analysis.R
-
-#Building & Developing Locally
-
-For contributors modifying the environment:
-
-Clone the repository:
-
+# How to Run
+1. In your terminal, clone the project and set it as your working directory:
 git clone https://github.com/DSCI-310-2025/dsci-310-group-16.git
-cd dsci310-group-16
+cd dsci-310-group-16
+2. Next, run:
+docker build -t annmariect/dsci-310-group-16 .
+docker run -it --rm -p 8787:8787 -v /$(pwd):/home/rstudio annmariect/dsci-310-group-16
+4. In a browser, open up: http://localhost:8787
+When prompted to put a username: Rstudio
+When prompted to put a password: Put the password from the run command
+5. Open bike_analysis.rmd and press the "Run" button
+6. Press "Knit" to get a copy of our report
 
-Build the Docker image:
+# Dependencies
+- Docker
+- Git
+R Specific
+- library(vroom)
+- library(tidyverse)
+- library(tidymodels)
+- library(ggplot2)
+- library(ucimlrepo)
+- library(leaps)
+- library(mltools)
+- library(ggpubr)
 
-docker build -t dsci310-group-16 .
+# Licenses and Code of Conduct
+[license](LICENSE) and [Code of Conduct](CODE_OF_CONDUCT.md)
 
-Run it:
-
-docker run --rm -it dsci310-group-16 R
-
-#Automated Build & Deployment
-
-The GitHub Actions workflow (.github/workflows/publish_docker_image.yml) automates Docker image builds and pushes to DockerHub whenever the Dockerfile is updated in main.
-
-To trigger manually, push an empty commit:
-
-git commit --allow-empty -m "Trigger Docker build"
-git push origin main
-
-
-All contributors can work in a consistent, reproducible environment using Docker! 
 
