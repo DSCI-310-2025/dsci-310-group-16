@@ -30,7 +30,7 @@ This project uses Docker to ensure a consistent and reproducible computing envir
 
 - Contributors can run the same environment on any system.
 
-# Install Docker
+#Install Docker
 
 Download & Install Docker
 
@@ -38,7 +38,7 @@ Verify installation:
 
 docker --version
 
-# Run the Docker Container
+#Run the Docker Container
 
 Pull and run the latest image from DockerHub:
 
@@ -49,7 +49,7 @@ Run an R script inside the container:
 
 docker run --rm -v $(pwd):/workspace -w /workspace YOUR_DOCKER_USERNAME/dsci310-group-16 Rscript analysis.R
 
-# Building & Developing Locally
+#Building & Developing Locally
 
 For contributors modifying the environment:
 
@@ -66,7 +66,7 @@ Run it:
 
 docker run --rm -it dsci310-group-16 R
 
-# Automated Build & Deployment
+#Automated Build & Deployment
 
 The GitHub Actions workflow (.github/workflows/publish_docker_image.yml) automates Docker image builds and pushes to DockerHub whenever the Dockerfile is updated in main.
 
