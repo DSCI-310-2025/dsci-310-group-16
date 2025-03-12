@@ -1,4 +1,4 @@
-# MIT License 
+## MIT License 
 
 Copyright (c) 2025 DSCI-310-2025
 
@@ -20,7 +20,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-# Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)
+## Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)
 This work is licensed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License.
 
 To access the full license, visit [Link](https://creativecommons.org/licenses/by-nc-nd/4.0/) 
