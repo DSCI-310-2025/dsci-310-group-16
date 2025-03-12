@@ -39,18 +39,16 @@ When prompted to put a password: Put the password from the run command
 6. Press "Knit" to get a copy of our report
 
 # Dependencies
-- Docker
-- Git
-
-R Specific
-- library(vroom)
-- library(tidyverse)
-- library(tidymodels)
-- library(ggplot2)
-- library(ucimlrepo)
-- library(leaps)
-- library(mltools)
-- library(ggpubr)
+Note the analysis runs on rocker/rstudio:4.4.2 image
+- ggplot2: Version 3.5.1  
+- tidymodels: Version 1.3.0  
+- rmarkdown: Version 2.29  
+- readr: Version 2.1.5  
+- GGally: Version 2.2.1  
+- leaps: Version 3.1  
+- mltools: Version 0.1.0  
+- purrr: Version 1.0.4  
+- knitr: Version 1.49  
 
 # Licenses and Code of Conduct
 [License](LICENSE) and [Code of Conduct](CODE_OF_CONDUCT.md)
