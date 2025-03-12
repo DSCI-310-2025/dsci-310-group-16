@@ -22,12 +22,13 @@ cd dsci-310-group-16
 ```bash
 git clone https://github.com/DSCI-310-2025/dsci-310-group-16.git
 cd dsci-310-group-16`
+```
 
 2. Next, run:
-
 ```bash
 docker build -t annmariect/dsci-310-group-16 .
 docker run -it --rm -p 8787:8787 -v /$(pwd):/home/rstudio annmariect/dsci-310-group-16
+```
 
 4. In a browser, open up: http://localhost:8787
 
