@@ -13,20 +13,20 @@ This project analyzes bike-sharing data to uncover patterns in usage, seasonal t
 
 Clone the repository:
 
-git clone https://github.com/DSCI-310-2025/dsci-310-group-16.git
+`git clone https://github.com/DSCI-310-2025/dsci-310-group-16.git`
 
 cd dsci-310-group-16
 
 # How to Run
 1. In your terminal, clone the project and set it as your working directory:
-
+```bash
 git clone https://github.com/DSCI-310-2025/dsci-310-group-16.git
-cd dsci-310-group-16
+cd dsci-310-group-16`
 
 2. Next, run:
 
+```bash
 docker build -t annmariect/dsci-310-group-16 .
-
 docker run -it --rm -p 8787:8787 -v /$(pwd):/home/rstudio annmariect/dsci-310-group-16
 
 4. In a browser, open up: http://localhost:8787
