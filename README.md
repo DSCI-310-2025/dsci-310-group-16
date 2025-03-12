@@ -52,7 +52,7 @@ Note the analysis runs on rocker/rstudio:4.4.2 image
 - `purrr`: Version 1.0.4  
 - `knitr`: Version 1.49  
 
-# Licenses and Code of Conduct
-[License](LICENSE) and [Code of Conduct](CODE_OF_CONDUCT.md)
+# Licenses
+This project is licensed under the terms outlined in [LICENSE.md](LICENSE.md), including the `MIT License` and the `Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)` License.
 
 
