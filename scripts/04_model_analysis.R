@@ -3,6 +3,7 @@ library(tidymodels)
 library(leaps)
 library(broom)
 library(ggplot2)
+library(mltools)
 
 bike_data <- read.csv("data/cleaned/bike_data.csv")
 
@@ -31,7 +32,7 @@ mutate(partition = c("Train", "Test"),
   relocate(partition, fraction)
 
 # Save summary statistics to a file
-write_csv(bike_tt_summary, paste0(output_prefix, "_summary_stats.csv"))
+write_csv(bike_tt_summary, "output/summary_stats.csv")
 
 # Determine the best model
 best_models <- regsubsets(log(cnt) ~ season + holiday + workingday + weathersit + temp + hum + windspeed, 
@@ -46,7 +47,7 @@ best_subset_results <- data.frame(
   R2 = which.max(res.sum$rsq),
   Adj.R2 = which.max(res.sum$adjr2)
 )
-write_csv(best_subset_results, paste0(output_prefix, "_best_subset_results.csv"))
+write_csv(best_subset_results, "output/best_subset_results.csv")
 
 # Fit the final model (including weathersit)
 final_bike_model <- lm(log(cnt) ~ season + holiday + workingday + weathersit + temp + hum + windspeed, 
@@ -54,7 +55,7 @@ final_bike_model <- lm(log(cnt) ~ season + holiday + workingday + weathersit + t
 
 # Save final model summary to a file
 model_summary <- tidy(final_bike_model)
-write_csv(model_summary, paste0(output_prefix, "_model_summary.csv"))
+write_csv(model_summary, "output/model_summary.csv")
 
 # Make predictions on the test set
 predictions <- predict(final_bike_model, newdata = bike_test)
@@ -62,15 +63,15 @@ predictions <- predict(final_bike_model, newdata = bike_test)
 # Calculate RMSE
 rmse_value <- rmse(preds = predictions, actuals = log(bike_test$cnt))
 rmse_df <- data.frame(RMSE = rmse_value)
-write_csv(rmse_df, paste0(output_prefix, "_rmse.csv"))
+write_csv(rmse_df, "output/rmse.csv")
 
 # Save predictions to a file
 predictions_df <- data.frame(actual = log(bike_test$cnt), predicted = predictions)
-write_csv(predictions_df, paste0(output_prefix, "_predictions.csv"))
+write_csv(predictions_df, "output/predictions.csv")
 
 # Generate and save residual plot
 residual_plot <- ggplot(bike_train, aes(x = fitted(final_bike_model), y = residuals(final_bike_model))) +
   geom_point(alpha = 0.5) +
   geom_hline(yintercept = 0, linetype = 'dashed', color = "red") +
   labs(title = "Residual Plot", x = "Fitted Values", y = "Residuals")
-ggsave(paste0(output_prefix, "_residual_plot.png"), plot = residual_plot)
+ggsave("output/residual_plot.png", plot = residual_plot)
