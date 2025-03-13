@@ -30,7 +30,7 @@ Bike-sharing systems are a growing component of urban design (Winters, 2020), pr
 ### Methods and Results
 
 | Predictor Variable | Description |
-|-----------------------|-------------------------------------------------|
+|----|----|
 | season | Season that the bike is rented in |
 | holiday | If the day the bike was rented is a holiday |
 | workingday | If the day the bike was rented is a work day |
