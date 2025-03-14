@@ -33,93 +33,70 @@ knitr (@knitr), tidyverse (@tidyverse), tidymodels (@tidymodels), ggplot2 (@ggpl
 
 ### Methods and Results
 
-| Predictor Variable | Description |
-|----|----|
-| season | Season that the bike is rented in |
-| holiday | If the day the bike was rented is a holiday |
-| workingday | If the day the bike was rented is a work day |
-| weathersit | What the weather was on the day the bike was rented |
-| temp | What the temperature was on the day the bike was rented |
-| hum | What the humidity was on the day the bike was rented |
-| windspeed | What the windsped was on the day the bike was rented |
-
-**Table 1.** Predictor variables used for analysis
+```{r, echo=FALSE}
+data.frame(
+  Predictor_Variable = c("season", "holiday", "workingday", "weathersit", "temp", "hum", "windspeed"),
+  Description = c(
+    "Season that the bike is rented in",
+    "If the day is a holiday",
+    "If the day is a workday",
+    "What the weather was on the day the bike was rented ",
+    "What the temperature was on the day the bike was rented",
+    "What the humidity was on the day the bike was rented",
+    "What the windsped was on the day the bike was rented"
+  )
+) |> knitr::kable(caption = "Predictor variables used for analysis")
+```
 
 Our dataset was loaded and cleaned by ensuring correct factorization and removing irrelevant columns. We had no missing data or special characters so we did not have to worry about that.
 
 ```{r read and clean data}
-bike <- fetch_ucirepo(id = 275)
-bike_data <- bike$data$original
+# Load required packages
+library(tidyverse)  # This includes dplyr, ggplot2, tidyr, readr, etc.
+
+# Define dataset URL
+bike_url <- "https://archive.ics.uci.edu/ml/machine-learning-databases/00275/Bike-Sharing-Dataset.zip"
+
+# Define file paths
+zip_path <- "../dsci-310-group-16/data/bike_data.zip"
+csv_output_path <- "../dsci-310-group-16/data/bike_data.csv"
+
+# Download the ZIP file if it doesn't exist
+if (!file.exists(zip_path)) {
+  download.file(bike_url, zip_path)
+}
+
+# Extract ZIP file (only if not extracted)
+unzip(zip_path, exdir = "../dsci-310-group-16/data")
+
+# Read the dataset (use `hour.csv` instead for hourly data)
+bike_data <- read.csv("../dsci-310-group-16/data/day.csv")
+
+# Ensure dplyr pipes (%>%) work
 bike_data <- bike_data %>%
-  select(-instant, -dteday)
-bike_data <- bike_data %>%
-  mutate(weathersit = as.factor(weathersit))
-bike_data <- bike_data %>%
-  mutate(cnt = as.numeric(cnt))
-write_csv(bike_data, "../dsci-310-group-16/data/bike_data.csv")
+  select(-instant, -dteday) %>%
+  mutate(
+    weathersit = as.factor(weathersit),
+    cnt = as.numeric(cnt)
+  )
+
+# Save cleaned data
+write_csv(bike_data, csv_output_path)
+
+# Print first few rows to confirm
+head(bike_data)
 ```
 
 In our exploratory analysis, we looked to see how dependent variables affected bike rental usage. We also made a correlation matrix to explore how correlated our variables are. We found multicollinearity between atemp and temp, so moving forward we will use temp in our analysis. Finally, we found that the distribution of bike rental counts was heavily right skewed. Because we plan to use linear regression and we want to maintain the assumption of normality, moving forward we will be using a log transformation on the cnt variable.
 
-```{r exploratory analysis, fig.width=10, fig.height=10}
+![Distributions of dependent variables vs bike rental counts](../output/exploratory.png){#fig-exploratory_analysis width=80%}
+**@fig-exploratory_analysis**: Distributions of dependent variables vs bike rental counts
 
-total_rentals = ggplot(bike_data,aes(x = cnt))+
-geom_histogram(binwidth = 10, fill = "blue",color = "black",alpha = 0.7)+
-labs(title = "Histogram of the total bike rentals", x = "Total rentals")
+![Distribution of bike rental counts](../output/total.png){#fig-total_rentals width=50%}
+**@fig-total_rentals**: Distribution of bike rental counts
 
-temp_vs_rentals = ggplot(bike_data, aes(x = temp, y = cnt)) +
-  geom_point(color = "blue", alpha = 0.5) +
-  theme_minimal() +
-  labs(title = "Temperature vs Bike Rentals", x = "Temperature", y = "Total Bike Rentals")
-
-
-weather_vs_cnt = ggplot(bike_data, aes(x = factor(weathersit), y = cnt, fill = factor(weathersit))) +
-  geom_bar(stat = "identity") +
-  scale_x_discrete(labels=c("Clear/Partly Cloudy", "Mist and Cloudy", "Light Percipitation", "Heavy Percipitation")) +
-  labs(title = "Bike Rentals by \nWeather Situation", x = "Weather Situation", y = "Total Bike Rentals") +
-  theme(axis.text.x = element_text(angle = 70, vjust = 0.5))
-
-
-season_vs_cnt = ggplot(bike_data, aes(x = factor(season), y = cnt)) +
-  geom_boxplot(fill = "lightgreen", color = "black", alpha = 0.7) +
-  labs(title = "Bike Rentals by Season", x = "Season", y = "Total Bike Rentals")
-
-weekday_rental = ggplot(bike_data, aes(x = factor(weekday), y = cnt, fill = factor(weekday))) +
-  geom_bar(stat = "identity", show.legend = FALSE) +
-  scale_fill_viridis_d() +
-  scale_x_discrete(labels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")) +
-  labs(title = "Bike Rentals by Weekday", x = "Weekday", y = "Total Bike Rentals") +
-  theme(axis.text.x = element_text(angle = 70, vjust = 0.5))
-
-humidty_rental = ggplot(bike_data, aes(x = hum, y = cnt)) +
-  geom_point(color = "purple", alpha = 0.5) +
-  labs(title = "Humidity vs Bike Rentals", x = "Humidity", y = "Total Bike Rentals") +
-  theme(axis.text.x = element_text(angle = 70, vjust = 0.5))
-
-wind_rental = ggplot(bike_data, aes(x = windspeed, y = cnt)) +
-  geom_point(color = "green", alpha = 0.5) +
-  theme_minimal() +
-  labs(title = "Windspeed vs Bike Rentals", x = "Wind Speed", y = "Total Bike Rentals")
-
-
-ggarrange(temp_vs_rentals, weather_vs_cnt, season_vs_cnt, weekday_rental, humidty_rental, wind_rental)
-
-```
-
-**Figure 1.** Distributions of dependent variables vs bike rental counts
-
-```{r}
-total_rentals
-```
-
-**Figure 2.** Distribution of bike rental counts
-
-```{r}
-cor(bike_data %>% select(temp, atemp, hum, windspeed, casual, registered, cnt))
-
-```
-
-**Figure 3.** Correlation matrix of prediction variables
+![Correlation matrix of prediction variables](../output/cor_plot.png){#fig-correlation width=50%}
+**@fig-correlation**: Correlation matrix of prediction variables
 
 The data was split into training (75%) and testing (25%) sets, stratified by cnt (total bike counts). To ensure we had enough data representation in the test set, we computed the median, mean, and standard deviation for both data sets to make sure they were similar.
 
@@ -188,15 +165,9 @@ tidy(final_bike_model)
 
 To assess the model fit, we generated a residual plot. This plot indicates that even with our log transformation, the residuals are a bit heteroscedastic, and in future renditions of this project we plan to adopt a different, more appropriate model.
 
-```{r test final model}
-ggplot(bike_train,aes(x= fitted(final_bike_model),y = residuals(final_bike_model)))+
-geom_point(alpha = 0.5)+
-geom_hline(yintercept = 0,linetype = 'dashed',color = "red")+
-labs(title = "Residual plot", x = "Fitted values", y = "Residuals")
+![Residual plot of final model](../output/residual_plot.png){#fig-residual_plot width=60%}
 
-```
-
-**Figure 4.** Residual plot of final model
+**@fig-residual_plot**: Residual plot of final model.
 
 Finally, to evaluate prediction accuracy we calculated RMSE, which we found to be 1.29 uses approximately, suggesting the model prediction is good and our model is useful.
 
