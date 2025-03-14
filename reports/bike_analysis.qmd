@@ -2,20 +2,19 @@
 title: "Predicting Bike Rental Demand Using Regression Analysis"
 author: "Annmarie Thomson"
 date: "2025-1-3"
-output: github_document
+format: 
+  html:
+    toc: true
+    toc-title: "Table of Contents"
+    toc-depth: 2
+  pdf: 
+    toc: true
+bibliography: references.bib
+execute:
+  echo: false  
+  warning: false
+  message: false
 ---
-
-```{r}
-set.seed(2024)
-library(vroom)
-library(tidyverse)
-library(tidymodels)
-library(ggplot2)
-library(ucimlrepo)
-library(leaps)
-library(mltools)
-library(ggpubr)
-```
 
 ## Predicting Bike Rental Demand Using Regression Analysis
 
@@ -25,7 +24,12 @@ In our project, we will attempt to build a regression model using best subset se
 
 ### Introduction
 
-Bike-sharing systems are a growing component of urban design (Winters, 2020), providing an eco-friendly, convenient, and healthy alternative to traditional transient or driving. Building understanding around the factors that drive bike-share demand can help urban designers improve bike services. The dataset we used to form our regression is the Bike Sharing Dataset (dataset ID: 275) from the UCI Machine Learning Repository, which you can find at <https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset>. It contains information on bike rentals, weather, and time-related features. Our research question: How do environmental and temporal factors affect bike-sharing demand?
+Bike-sharing systems are an integral part of urban transportation (Winters, 2020). Understanding the factors driving bike-share demand can help urban planners optimize services.  The dataset we used to form our regression is the **Bike Sharing Dataset** (dataset ID: 275) from the [UCI Machine Learning Repository](https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset)(@bike_sharing_275). It contains information on bike rentals, weather conditions, and time-related features. Our research question: **To what extent can weather and timporal factors predict bike rental demand?**
+
+### Software & Packages
+The R programming language (@R) and the following R packages were used to perform the analysis: 
+knitr (@knitr), tidyverse (@tidyverse), tidymodels (@tidymodels), ggplot2 (@ggplot2), ucimlrepo (@ucimlrepo), leaps (@leaps), mltools (@mltools), and ggpubr (@ggpubr). 
+
 
 ### Methods and Results
 
@@ -216,12 +220,4 @@ How do long-term weather trends affect the seasonal bike usage?
 
 What other outside variables are impactful in the prediction of bike-share usage?
 
-### **Citations**
-
-Teschke, K. (n.d.). *Bike share*. Cycling in Cities. <https://cyclingincities.spph.ubc.ca/motivating-cycling/bikeshare-systems/>
-
-R Core Team. 2019. R: *A Language and Environment for Statistical Computing.* Vienna, Austria: R Foundation for Statistical Computing. [https://www.R-project.org/](https://www.r-project.org/).
-
-Wickham H (2016). *ggplot2: Elegant Graphics for Data Analysis*. Springer-Verlag New York. ISBN 978-3-319-24277-4, [https://ggplot2.tidyverse.org](https://ggplot2.tidyverse.org/).
-
-Fanaee-T, H. (2013). *Bike Sharing [Dataset]*. UCI Machine Learning Repository. <https://doi.org/10.24432/C5W894>.
+### Reference
