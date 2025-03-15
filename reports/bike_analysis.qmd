@@ -27,8 +27,8 @@ In our project, we will attempt to build a regression model using best subset se
 Bike-sharing systems are an integral part of urban transportation (Winters, 2020). Understanding the factors driving bike-share demand can help urban planners optimize services.  The dataset we used to form our regression is the **Bike Sharing Dataset** (dataset ID: 275) from the [UCI Machine Learning Repository](https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset)(@bike_sharing_275). It contains information on bike rentals, weather conditions, and time-related features. Our research question: **To what extent can weather and timporal factors predict bike rental demand?**
 
 ### Software & Packages
-The R programming language (@R) and the following R packages were used to perform the analysis: 
-knitr (@knitr), tidyverse (@tidyverse), tidymodels (@tidymodels), ggplot2 (@ggplot2), ucimlrepo (@ucimlrepo), leaps (@leaps), mltools (@mltools), and ggpubr (@ggpubr). 
+The R programming language [@R] and the following R packages were used to perform the analysis: 
+`knitr` [@knitr], `tidyverse` [@tidyverse], `tidymodels` [@tidymodels], `ggplot2` [@ggplot2], `ucimlrepo` [@ucimlrepo], `leaps` [@leaps], `mltools` [@mltools], and `ggpubr` [@ggpubr]. 
 
 
 ### Methods and Results
@@ -59,7 +59,7 @@ bike_data <- bike_data %>%
 write_csv(bike_data, "../dsci-310-group-16/data/bike_data.csv")
 ```
 
-In our exploratory analysis, we looked to see how dependent variables affected bike rental usage. We also made a correlation matrix to explore how correlated our variables are. We found multicollinearity between atemp and temp, so moving forward we will use temp in our analysis. Finally, we found that the distribution of bike rental counts was heavily right skewed. Because we plan to use linear regression and we want to maintain the assumption of normality, moving forward we will be using a log transformation on the cnt variable.
+In our exploratory analysis, we looked to see how dependent variables affected bike rental usage. We also made a correlation matrix to explore how correlated our variables are. We found multicollinearity between `atemp` and `temp`, so moving forward we will use `temp` in our analysis. Finally, we found that the distribution of bike rental counts was heavily right skewed. Because we plan to use linear regression and we want to maintain the assumption of normality, moving forward we will be using a log transformation on the `cnt` variable.
 
 ```{r exploratory analysis, fig.width=10, fig.height=10}
 
@@ -109,6 +109,7 @@ ggarrange(temp_vs_rentals, weather_vs_cnt, season_vs_cnt, weekday_rental, humidt
 **Figure 1.** Distributions of dependent variables vs bike rental counts
 
 ```{r}
+
 total_rentals
 ```
 
@@ -121,7 +122,7 @@ cor(bike_data %>% select(temp, atemp, hum, windspeed, casual, registered, cnt))
 
 **Figure 3.** Correlation matrix of prediction variables
 
-The data was split into training (75%) and testing (25%) sets, stratified by cnt (total bike counts). To ensure we had enough data representation in the test set, we computed the median, mean, and standard deviation for both data sets to make sure they were similar.
+The data was split into training (75%) and testing (25%) sets, stratified by `cnt` (total bike counts). To ensure we had enough data representation in the test set, we computed the median, mean, and standard deviation for both data sets to make sure they were similar.
 
 ```{r best subset}
 bike_split <- initial_split(bike_data, prop = 0.75, strata = cnt)
@@ -146,7 +147,7 @@ bike_tt_summary
 
 ```
 
-**Table 2.** Summary statistics for response variable (cnt) for each data split.
+**Table 2.** Summary statistics for response variable (`cnt`) for each data split.
 
 To determine the most appropriate model, we used the best subset framework. Because weather is a categorical variable, we needed to check if the model with or without weather did better to determine our final model.
 
