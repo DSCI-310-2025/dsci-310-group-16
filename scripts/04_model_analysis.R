@@ -59,6 +59,17 @@ best_subset_results <- data.frame(
 output_file2 = file.path(path = opt$output_dir, "best_subset_results.csv")
 write_csv(best_subset_results, output_file2)
 
+bike_model_with_weather = lm(log(cnt) ~ season + holiday + workingday + weathersit + temp + hum + windspeed, data = bike_train)
+res_with <- summary(bike_model_with_weather)
+bike_model_no_weather = lm(log(cnt) ~ season + holiday + workingday + temp + hum + windspeed, data = bike_train)
+res_no <- summary(bike_model_no_weather)
+weather <- data.frame(
+  Adj.R2_with = res_with$adj.r.squared,
+  Adj.R2_without = res_no$adj.r.squared
+)
+output_file6 = file.path(path = opt$output_dir, "weather.csv")
+write_csv(weather, output_file6)
+
 # Fit the final model (including weathersit)
 final_bike_model <- lm(log(cnt) ~ season + holiday + workingday + weathersit + temp + hum + windspeed, 
                        data = bike_train)

@@ -54,7 +54,7 @@ wind_rental = ggplot(bike_data, aes(x = windspeed, y = cnt)) +
 exploratory = ggarrange(temp_vs_rentals, weather_vs_cnt, season_vs_cnt, weekday_rental, humidty_rental, wind_rental)
 
 show(exploratory)
-ggsave("exploratory.png", path=opt$output_dir)
+ggsave("exploratory.png", path=opt$output_dir, width = 15)
 
 total_rentals = ggplot(bike_data,aes(x = cnt))+
 geom_histogram(binwidth = 10, fill = "blue",color = "black",alpha = 0.7)+

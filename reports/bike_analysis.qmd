@@ -1,14 +1,12 @@
 ---
 title: "Predicting Bike Rental Demand Using Regression Analysis"
-author: "Annmarie Thomson"
-date: "2025-1-3"
+author: "Annmarie Thomson, Christina Zhang, Arya Sardesai"
+date: "3-15-2025"
 format: 
   html:
-    toc: true
-    toc-title: "Table of Contents"
-    toc-depth: 2
-  pdf: 
-    toc: true
+      embed-resources: true
+toc: true
+toc-title: "Table of Contents"
 bibliography: references.bib
 execute:
   echo: false  
@@ -16,19 +14,17 @@ execute:
   message: false
 ---
 
-## Predicting Bike Rental Demand Using Regression Analysis
-
 ### Summary
 
 In our project, we will attempt to build a regression model using best subset selection to analyze bike-sharing data to predict rental demand. We will examine factors like weather, time, and holidays to understand their influence on bike usage.
 
 ### Introduction
 
-Bike-sharing systems are an integral part of urban transportation (Winters, 2020). Understanding the factors driving bike-share demand can help urban planners optimize services.  The dataset we used to form our regression is the **Bike Sharing Dataset** (dataset ID: 275) from the [UCI Machine Learning Repository](https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset)(@bike_sharing_275). It contains information on bike rentals, weather conditions, and time-related features. Our research question: **To what extent can weather and timporal factors predict bike rental demand?**
+Bike-sharing systems are an integral part of urban transportation (Winters, 2020). Understanding the factors driving bike-share demand can help urban planners optimize services.  The dataset we used to form our regression is the **Bike Sharing Dataset** (dataset ID: 275) from the [UCI Machine Learning Repository](https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset) (@bike_sharing_275). It contains information on bike rentals, weather conditions, and time-related features. Our research question: **How many bikes will be rented on a day based on weather and temporal factors?**
 
 ### Software & Packages
 The R programming language [@R] and the following R packages were used to perform the analysis: 
-`knitr` [@knitr], `tidyverse` [@tidyverse], `tidymodels` [@tidymodels], `ggplot2` [@ggplot2], `ucimlrepo` [@ucimlrepo], `leaps` [@leaps], `mltools` [@mltools], and `ggpubr` [@ggpubr]. 
+`knitr` [@knitr], `tidyverse` [@tidyverse], `tidymodels` [@tidymodels], `ucimlrepo` [@ucimlrepo], `leaps` [@leaps], `mltools` [@mltools], and `ggpubr` [@ggpubr]. 
 
 
 ### Methods and Results
@@ -42,172 +38,63 @@ The R programming language [@R] and the following R packages were used to perfor
 | temp | What the temperature was on the day the bike was rented |
 | hum | What the humidity was on the day the bike was rented |
 | windspeed | What the windsped was on the day the bike was rented |
-
-**Table 1.** Predictor variables used for analysis
+: Predictor variables used for analysis {#tbl-predictors}
 
 Our dataset was loaded and cleaned by ensuring correct factorization and removing irrelevant columns. We had no missing data or special characters so we did not have to worry about that.
 
-```{r read and clean data}
-bike <- fetch_ucirepo(id = 275)
-bike_data <- bike$data$original
-bike_data <- bike_data %>%
-  select(-instant, -dteday)
-bike_data <- bike_data %>%
-  mutate(weathersit = as.factor(weathersit))
-bike_data <- bike_data %>%
-  mutate(cnt = as.numeric(cnt))
-write_csv(bike_data, "../dsci-310-group-16/data/bike_data.csv")
-```
+In our exploratory analysis, we looked to see how dependent variables affected bike rental usage @fig-exploratory. We also made a correlation matrix, @fig-cor, to explore how correlated our variables are. We found multicollinearity between `atemp` and `temp`, so moving forward we will use `temp` in our analysis. Finally, we found that the distribution of bike rental counts was heavily right skewed. Because we plan to use linear regression and we want to maintain the assumption of normality, moving forward we will be using a log transformation on the `cnt` variable.
 
-In our exploratory analysis, we looked to see how dependent variables affected bike rental usage. We also made a correlation matrix to explore how correlated our variables are. We found multicollinearity between `atemp` and `temp`, so moving forward we will use `temp` in our analysis. Finally, we found that the distribution of bike rental counts was heavily right skewed. Because we plan to use linear regression and we want to maintain the assumption of normality, moving forward we will be using a log transformation on the `cnt` variable.
+![Distributions of dependent variables vs bike rental counts](../output/exploratory.png){#fig-exploratory width="80%"}
 
-```{r exploratory analysis, fig.width=10, fig.height=10}
+![Distribution of bike rental counts](../output/total.png){#fig-total width="60%"}
 
-total_rentals = ggplot(bike_data,aes(x = cnt))+
-geom_histogram(binwidth = 10, fill = "blue",color = "black",alpha = 0.7)+
-labs(title = "Histogram of the total bike rentals", x = "Total rentals")
+![Correlation matrix of prediction variables](../output/cor_plot.png){#fig-cor width="60%"}
 
-temp_vs_rentals = ggplot(bike_data, aes(x = temp, y = cnt)) +
-  geom_point(color = "blue", alpha = 0.5) +
-  theme_minimal() +
-  labs(title = "Temperature vs Bike Rentals", x = "Temperature", y = "Total Bike Rentals")
-
-
-weather_vs_cnt = ggplot(bike_data, aes(x = factor(weathersit), y = cnt, fill = factor(weathersit))) +
-  geom_bar(stat = "identity") +
-  scale_x_discrete(labels=c("Clear/Partly Cloudy", "Mist and Cloudy", "Light Percipitation", "Heavy Percipitation")) +
-  labs(title = "Bike Rentals by \nWeather Situation", x = "Weather Situation", y = "Total Bike Rentals") +
-  theme(axis.text.x = element_text(angle = 70, vjust = 0.5))
-
-
-season_vs_cnt = ggplot(bike_data, aes(x = factor(season), y = cnt)) +
-  geom_boxplot(fill = "lightgreen", color = "black", alpha = 0.7) +
-  labs(title = "Bike Rentals by Season", x = "Season", y = "Total Bike Rentals")
-
-weekday_rental = ggplot(bike_data, aes(x = factor(weekday), y = cnt, fill = factor(weekday))) +
-  geom_bar(stat = "identity", show.legend = FALSE) +
-  scale_fill_viridis_d() +
-  scale_x_discrete(labels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")) +
-  labs(title = "Bike Rentals by Weekday", x = "Weekday", y = "Total Bike Rentals") +
-  theme(axis.text.x = element_text(angle = 70, vjust = 0.5))
-
-humidty_rental = ggplot(bike_data, aes(x = hum, y = cnt)) +
-  geom_point(color = "purple", alpha = 0.5) +
-  labs(title = "Humidity vs Bike Rentals", x = "Humidity", y = "Total Bike Rentals") +
-  theme(axis.text.x = element_text(angle = 70, vjust = 0.5))
-
-wind_rental = ggplot(bike_data, aes(x = windspeed, y = cnt)) +
-  geom_point(color = "green", alpha = 0.5) +
-  theme_minimal() +
-  labs(title = "Windspeed vs Bike Rentals", x = "Wind Speed", y = "Total Bike Rentals")
-
-
-ggarrange(temp_vs_rentals, weather_vs_cnt, season_vs_cnt, weekday_rental, humidty_rental, wind_rental)
-
-```
-
-**Figure 1.** Distributions of dependent variables vs bike rental counts
+The data was split into training (75%) and testing (25%) sets, stratified by `cnt` (total bike counts). To ensure we had enough data representation in the test set, we computed the median, mean, and standard deviation for both data sets to make sure they were similar, which can be seen in @tbl-sum.
 
 ```{r}
-
-total_rentals
+#| label: tbl-sum
+#| tbl-cap: "Summary statistics for response variable (`cnt`) for each data split."
+summary_stats <- read.csv("../output/summary_stats.csv")
+knitr::kable(summary_stats)
 ```
 
-**Figure 2.** Distribution of bike rental counts
+To determine the most appropriate model, we used the best subset framework, seen here @tbl-best_subset. Because weather is a categorical variable, we needed to check if the model with or without weather did better to determine our final model.
 
 ```{r}
-cor(bike_data %>% select(temp, atemp, hum, windspeed, casual, registered, cnt))
-
+#| label: tbl-best_subset
+#| tbl-cap: "Model with largest R^2^ and adjusted R^2"
+best_subset <- read.csv("../output/best_subset_results.csv")
+knitr::kable(best_subset)
 ```
 
-**Figure 3.** Correlation matrix of prediction variables
-
-The data was split into training (75%) and testing (25%) sets, stratified by `cnt` (total bike counts). To ensure we had enough data representation in the test set, we computed the median, mean, and standard deviation for both data sets to make sure they were similar.
-
-```{r best subset}
-bike_split <- initial_split(bike_data, prop = 0.75, strata = cnt)
-bike_train <- training(bike_split)
-bike_test <- testing(bike_split)
-
-bike_train_summary <- bike_train |> 
-    summarize(median_cnt = median(cnt, na.rm = TRUE),
-             mean_cnt = mean(cnt, na.rm = TRUE),
-             standard_deviation_cnt = sd(cnt, na.rm = TRUE))
-
-bike_test_summary <- bike_test |> 
-    summarize(median_cnt = median(cnt, na.rm = TRUE),
-             mean_cnt = mean(cnt, na.rm = TRUE),
-             standard_deviation_cnt = sd(cnt, na.rm = TRUE))
-
-bike_tt_summary <- bind_rows(bike_train_summary, bike_test_summary) |>
-    mutate(partition = c("Train", "Test"),
-           fraction = c(0.8, 0.2))|> 
-    relocate(partition, fraction)
-bike_tt_summary
-
-```
-
-**Table 2.** Summary statistics for response variable (`cnt`) for each data split.
-
-To determine the most appropriate model, we used the best subset framework. Because weather is a categorical variable, we needed to check if the model with or without weather did better to determine our final model.
+We created two linear regression models with and without weather respecively to assess their impact on bike demand. Because the model that included weather had a higher adjusted R^2 (tbl-weather) , we decided to use that model as our final regression model, as seen in @tbl-model.
 
 ```{r}
-best_models <- regsubsets(log(cnt)~ season + holiday + workingday + weathersit + temp + hum + windspeed, data = bike_train, nvmax = 11)
-
-res.sum <- summary(best_models)
-
-data.frame(
-  R2 = which.max(res.sum$rsq),
-  Adj.R2 = which.max(res.sum$adjr2)
-)
+#| label: tbl-weather
+#| tbl-cap: "Comparing model with and without weather"
+weather <- read.csv("../output/weather.csv")
+knitr::kable(weather)
+```
+```{r}
+#| label: tbl-model
+#| tbl-cap: "Final model summary"
+model <- read.csv("../output/model_summary.csv")
+knitr::kable(model)
 ```
 
-**Table 3.** Model with largest R^2^ and adjusted R^2^
+To assess the model fit, we generated a residual plot, @fig-res. This plot indicates that even with our log transformation, the residuals are a bit heteroscedastic, and in future renditions of this project we plan to adopt a different, more appropriate model.
 
-We created two linear regression models with and without weather respecively to assess their impact on bike demand. Because the model that included weather had a higher adjusted R^2^ , we decided to use that model as our final regression model.
+![Residual plot of final model](../output/residual_plot.png){#fig-res width="65%"}
+
+Finally, to evaluate prediction accuracy we calculated RMSE in @tbl-rmse, which we found to be 1.29 uses approximately, suggesting the model prediction is good and our model is useful.
 
 ```{r}
-bike_model_with_weather = lm(log(cnt) ~ season + holiday + workingday + weathersit + temp + hum + windspeed, data = bike_train)
-res_with <- summary(bike_model_with_weather)
-bike_model_no_weather = lm(log(cnt) ~ season + holiday + workingday + temp + hum + windspeed, data = bike_train)
-res_no <- summary(bike_model_no_weather)
-data.frame(
-  Adj.R2_with = res_with$adj.r.squared,
-  Adj.R2_without = res_no$adj.r.squared
-)
-
+#| label: tbl-rmse
+#| tbl-cap: "RMSE of our linear modely"
+rmse <- read.csv("../output/rmse.csv")
+knitr::kable(rmse, align = 'c')
 ```
-
-**Table 4.** Comparing model with and without weather
-
-```{r}
-final_bike_model = bike_model_with_weather
-tidy(final_bike_model)
-```
-
-**Table 5.** Final model summary
-
-To assess the model fit, we generated a residual plot. This plot indicates that even with our log transformation, the residuals are a bit heteroscedastic, and in future renditions of this project we plan to adopt a different, more appropriate model.
-
-```{r test final model}
-ggplot(bike_train,aes(x= fitted(final_bike_model),y = residuals(final_bike_model)))+
-geom_point(alpha = 0.5)+
-geom_hline(yintercept = 0,linetype = 'dashed',color = "red")+
-labs(title = "Residual plot", x = "Fitted values", y = "Residuals")
-
-```
-
-**Figure 4.** Residual plot of final model
-
-Finally, to evaluate prediction accuracy we calculated RMSE, which we found to be 1.29 uses approximately, suggesting the model prediction is good and our model is useful.
-
-```{r}
-predictions = predict(final_bike_model, newdata = bike_test)
-RMSE = rmse(preds = predictions, actuals = log(bike_test$cnt))
-data.frame(RMSE)
-```
-
-**Table 6.** RMSE of our linear model
 
 ### Discussion
 
