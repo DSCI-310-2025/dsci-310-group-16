@@ -4,8 +4,16 @@ library(leaps)
 library(broom)
 library(ggplot2)
 library(mltools)
+library(docopt)
 
-bike_data <- read.csv("data/cleaned/bike_data.csv")
+"This script loads, cleans, saves titanic data
+
+Usage: 04_model_analysis.R --file_path=<file_path> --output_dir=<output_dir>
+" -> doc
+
+opt <- docopt(doc)
+
+bike_data <- read.csv(opt$file_path)
 
 #splitting data
 
@@ -32,7 +40,8 @@ mutate(partition = c("Train", "Test"),
   relocate(partition, fraction)
 
 # Save summary statistics to a file
-write_csv(bike_tt_summary, "output/summary_stats.csv")
+output_file = file.path(path = opt$output_dir, "summary_stats.csv")
+write_csv(bike_tt_summary, output_file)
 
 # Determine the best model
 best_models <- regsubsets(log(cnt) ~ season + holiday + workingday + weathersit + temp + hum + windspeed, 
@@ -47,7 +56,8 @@ best_subset_results <- data.frame(
   R2 = which.max(res.sum$rsq),
   Adj.R2 = which.max(res.sum$adjr2)
 )
-write_csv(best_subset_results, "output/best_subset_results.csv")
+output_file2 = file.path(path = opt$output_dir, "best_subset_results.csv")
+write_csv(best_subset_results, output_file2)
 
 # Fit the final model (including weathersit)
 final_bike_model <- lm(log(cnt) ~ season + holiday + workingday + weathersit + temp + hum + windspeed, 
@@ -55,7 +65,8 @@ final_bike_model <- lm(log(cnt) ~ season + holiday + workingday + weathersit + t
 
 # Save final model summary to a file
 model_summary <- tidy(final_bike_model)
-write_csv(model_summary, "output/model_summary.csv")
+output_file3 = file.path(path = opt$output_dir, "model_summary.csv")
+write_csv(model_summary, output_file3)
 
 # Make predictions on the test set
 predictions <- predict(final_bike_model, newdata = bike_test)
@@ -63,15 +74,17 @@ predictions <- predict(final_bike_model, newdata = bike_test)
 # Calculate RMSE
 rmse_value <- rmse(preds = predictions, actuals = log(bike_test$cnt))
 rmse_df <- data.frame(RMSE = rmse_value)
-write_csv(rmse_df, "output/rmse.csv")
+output_file4 = file.path(path = opt$output_dir, "rmse.csv")
+write_csv(rmse_df, output_file4)
 
 # Save predictions to a file
 predictions_df <- data.frame(actual = log(bike_test$cnt), predicted = predictions)
-write_csv(predictions_df, "output/predictions.csv")
+output_file5 = file.path(path = opt$output_dir, "predictions.csv")
+write_csv(predictions_df, output_file5)
 
 # Generate and save residual plot
 residual_plot <- ggplot(bike_train, aes(x = fitted(final_bike_model), y = residuals(final_bike_model))) +
   geom_point(alpha = 0.5) +
   geom_hline(yintercept = 0, linetype = 'dashed', color = "red") +
   labs(title = "Residual Plot", x = "Fitted Values", y = "Residuals")
-ggsave("output/residual_plot.png", plot = residual_plot)
+ggsave("residual_plot.png",path=opt$output_dir)
