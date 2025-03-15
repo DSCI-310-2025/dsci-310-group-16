@@ -35,13 +35,13 @@ When prompted to put a password: Put the password from the run command
 
 # Dependencies
 Note the analysis runs on rocker/rstudio:4.4.2 image
-- 'tidyverse': Version 2.0.0
-- 'tidymodels': Version 1.3.0
-- 'vroom': Version 1.6.5
-- 'ucimlrepo': Version 0.0.2
+- `tidyverse`: Version 2.0.0
+- `tidymodels`: Version 1.3.0
+- `vroom`: Version 1.6.5
+- `ucimlrepo`: Version 0.0.2
 - `leaps`: Version 3.1
 - `mltools`: Version 0.1.0
-- 'ggpubr': Version 0.6.0
+- `ggpubr`: Version 0.6.0
 - `rmarkdown`: Version 2.29   
 - `knitr`: Version 1.49
 
