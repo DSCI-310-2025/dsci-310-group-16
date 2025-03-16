@@ -25,13 +25,17 @@ docker run -it --rm -p 8787:8787 -v /$(pwd):/home/rstudio annmariect/dsci-310-gr
 
 4. In a browser, open up: http://localhost:8787
 
-When prompted to put a username: Rstudio
+- When prompted to put a username: Rstudio
 
-When prompted to put a password: Put the password from the run command
+- When prompted to put a password: Put the password from the run command
 
-5. Open bike_analysis.rmd and press the "Run" button
+5. To Run the analysis
+- In the terminal, type
+- ```bash
+  make all
+  ```
 
-6. Press "Knit" to get a copy of our report
+7. Press "Knit" to get a copy of our report
 
 # Dependencies
 Note the analysis runs on rocker/rstudio:4.4.2 image
@@ -44,6 +48,8 @@ Note the analysis runs on rocker/rstudio:4.4.2 image
 - `ggpubr`: Version 0.6.0
 - `rmarkdown`: Version 2.29   
 - `knitr`: Version 1.49
+- `docopt`: Version 0.7.1
+- `corrplot`: Version 0.95
 
 # Licenses
 This project is licensed under the terms outlined in [LICENSE.md](LICENSE.md), including the `MIT License` and the `Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)` License.
