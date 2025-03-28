@@ -68,7 +68,7 @@ best_subset <- read.csv("../output/best_subset_results.csv")
 knitr::kable(best_subset)
 ```
 
-We created two linear regression models with and without weather respecively to assess their impact on bike demand. Because the model that included weather had a higher adjusted R^2 (tbl-weather) , we decided to use that model as our final regression model, as seen in @tbl-model.
+We created two linear regression models with and without weather respecively to assess their impact on bike demand. Because the model that included weather had a higher adjusted R^2 (@tbl-weather) , we decided to use that model as our final regression model, as seen in @tbl-model.
 
 ```{r}
 #| label: tbl-weather
