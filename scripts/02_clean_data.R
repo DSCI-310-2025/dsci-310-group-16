@@ -2,7 +2,6 @@ library(tidyverse)
 library(docopt)
 library(here)
 
-setwd("/Users/ck/DSCI310-2024W2/dsci-310-group-16")
 source("R/cleaning.R")
 
 "This script loads, cleans, saves titanic data
