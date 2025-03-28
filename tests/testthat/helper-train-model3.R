@@ -18,3 +18,8 @@ test_model <- lm(cnt ~ temp, data = bike_train_data)
 
 expected_rmse <- sqrt(mean((
     predict(test_model, bike_train_data) - bike_train_data$cnt)^2))
+
+test_save_data <- tibble(
+  x = 1:3,
+  y = c("a", "b", "c")
+)
