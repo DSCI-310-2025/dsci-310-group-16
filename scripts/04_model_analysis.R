@@ -5,8 +5,9 @@ library(broom)
 library(ggplot2)
 library(mltools)
 library(docopt)
+source("R/visualize.R")
 
-"This script loads, cleans, saves titanic data
+"This script analzyes and models the bike data
 
 Usage: 04_model_analysis.R --file_path=<file_path> --output_dir=<output_dir>
 " -> doc
@@ -94,8 +95,11 @@ output_file5 = file.path(path = opt$output_dir, "predictions.csv")
 write_csv(predictions_df, output_file5)
 
 # Generate and save residual plot
-residual_plot <- ggplot(bike_train, aes(x = fitted(final_bike_model), y = residuals(final_bike_model))) +
-  geom_point(alpha = 0.5) +
-  geom_hline(yintercept = 0, linetype = 'dashed', color = "red") +
-  labs(title = "Residual Plot", x = "Fitted Values", y = "Residuals")
+residual_plot <- make_scatter(bike_train, "fitted(final_bike_model)", "residuals(final_bike_model)", "Residual Plot", "Fitted Values", "Residuals", "Grey") +
+  geom_hline(yintercept = 0, linetype = 'dashed', color = "red") 
+
+  # ggplot(bike_train, aes(x = fitted(final_bike_model), y = residuals(final_bike_model))) +
+  # geom_point(alpha = 0.5) +
+  # geom_hline(yintercept = 0, linetype = 'dashed', color = "red") +
+  # labs(title = "Residual Plot", x = "Fitted Values", y = "Residuals")
 ggsave("residual_plot.png",path=opt$output_dir)
