@@ -18,3 +18,6 @@ RUN Rscript -e "remotes::install_version('knitr', version = '1.49', repos = 'htt
 
 RUN Rscript -e "remotes::install_version('docopt', version='0.7.1', repos = 'https://cran.r-project.org')"
 RUN Rscript -e "remotes::install_version('corrplot', version = '0.95', repos = 'https://cran.r-project.org')"
+
+# installing test that
+RUN Rscript -e "remotes::install_version('testthat',version= '3.2.0', repos = 'https://cran.r-project.org')"

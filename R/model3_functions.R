@@ -6,6 +6,7 @@ split_data <- function(data,prop = 0.75, strata = 'cnt'){
     list(train = training(split), test = testing(split))
 }
 
+#fitting linear best model
 fit_best_model <- function(train_data) {
     lm(log(cnt) ~ season+ temp + weathersit, 
     data = train_data)
