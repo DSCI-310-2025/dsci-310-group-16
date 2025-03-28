@@ -110,9 +110,9 @@ bike_test <- split$test
 #   labs(title = "Residual Plot", x = "Fitted Values", y = "Residuals")
 # ggsave("residual_plot.png",path=opt$output_dir)
 
-final_model <- train_lm_model(
+final_model <- train_bike_model(
   bike_train,
-  log(cnt) ~ season + temp
+  log(cnt) ~ season + holiday + workingday + weathersit + temp + hum + windspeed
 )
 
 write_csv(tidy(final_model), file.path(opt$output_dir, "model_summary.csv"))
