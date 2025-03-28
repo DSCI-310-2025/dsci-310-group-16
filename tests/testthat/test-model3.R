@@ -22,3 +22,18 @@ test_that("train_bike_model() returns valid lm object", {
   expect_true("coefficients" %in% names(model))
 })
 
+test_that("evaluate_model() calculates correct RMSE", {
+  result <- evaluate_model(test_model, bike_train_data, "cnt")
+  
+  # Check RMSE calculation
+  expect_equal(result$rmse, expected_rmse, tolerance = 0.001)
+  
+  # Check output structure
+  expect_named(result, c("rmse", "predictions"))
+  expect_s3_class(result$predictions, "data.frame")
+})
+
+test_that("evaluate_model() errors on invalid input", {
+  expect_error(evaluate_model("not_a_model", bike_train_data, "cnt"))
+  expect_error(evaluate_model(test_model, "not_a_dataframe", "cnt"))
+})

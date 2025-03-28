@@ -1,17 +1,17 @@
- library(tidyverse)
- library(tidymodels)
- library(leaps)
- library(broom)
- library(ggplot2)
- library(mltools)
- library(docopt)
- library(testthat)
- library(here)
+library(tidyverse)
+library(tidymodels)
+library(leaps)
+library(broom)
+library(ggplot2)
+library(mltools)
+library(docopt)
+library(testthat)
+library(here)
 
 
-source(here::here("R","model3_functions.R"))
+source(here::here("R", "model3_functions.R"))
 
- "This script loads, cleans, saves titanic data
+"This script loads, cleans, saves titanic data
 
 # Usage: 04_model_analysis.R --file_path=<file_path> --output_dir=<output_dir>
 # " -> doc
@@ -20,10 +20,10 @@ opt <- docopt(doc)
 
 # #bike_data <- read.csv(opt$file_path)
 bike_data <- tibble(
-   cnt= c(10:1,1:10),
-   season = rep(1:4,5),
-   temp = rnorm(20)
- )
+  cnt = c(10:1, 1:10),
+  season = rep(1:4, 5),
+  temp = rnorm(20)
+)
 
 # #splitting data
 
@@ -32,7 +32,7 @@ split <- split_data(bike_data)
 bike_train <- split$train
 bike_test <- split$test
 
-#Summary stats for the training and test sets
+# Summary stats for the training and test sets
 
 # bike_train_summary <- bike_train |>
 # summarize(mediant_cnt = median(cnt,na.rm = TRUE),
@@ -46,7 +46,7 @@ bike_test <- split$test
 
 # bike_tt_summary <- bind_rows(bike_train_summary,bike_test_summary)|>
 # mutate(partition = c("Train", "Test"),
-#          fraction = c(0.75, 0.25)) |> 
+#          fraction = c(0.75, 0.25)) |>
 #   relocate(partition, fraction)
 
 # # Save summary statistics to a file
@@ -54,7 +54,7 @@ bike_test <- split$test
 # write_csv(bike_tt_summary, output_file)
 
 # # Determine the best model
-# best_models <- regsubsets(log(cnt) ~ season + holiday + workingday + weathersit + temp + hum + windspeed, 
+# best_models <- regsubsets(log(cnt) ~ season + holiday + workingday + weathersit + temp + hum + windspeed,
 #                           data = bike_train, nvmax = 11)
 
 # # Summarize best subset results
@@ -81,7 +81,7 @@ bike_test <- split$test
 # write_csv(weather, output_file6)
 
 # # Fit the final model (including weathersit)
-# final_bike_model <- lm(log(cnt) ~ season + holiday + workingday + weathersit + temp + hum + windspeed, 
+# final_bike_model <- lm(log(cnt) ~ season + holiday + workingday + weathersit + temp + hum + windspeed,
 #                        data = bike_train)
 
 # # Save final model summary to a file
@@ -97,6 +97,10 @@ bike_test <- split$test
 # rmse_df <- data.frame(RMSE = rmse_value)
 # output_file4 = file.path(path = opt$output_dir, "rmse.csv")
 # write_csv(rmse_df, output_file4)
+
+eval_results <- evaluate_model(final_bike_model, bike_test, "cnt")
+rmse_value <- eval_results$rmse
+predictions_df <- eval_results$predictions
 
 # # Save predictions to a file
 # predictions_df <- data.frame(actual = log(bike_test$cnt), predicted = predictions)

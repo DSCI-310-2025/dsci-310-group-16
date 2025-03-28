@@ -13,3 +13,8 @@ expected_model_structure <- list(
   coefficients = numeric(3),  # Intercept + 2 predictors
   rank = 3L
 )
+
+test_model <- lm(cnt ~ temp, data = bike_train_data)
+
+expected_rmse <- sqrt(mean((
+    predict(test_model, bike_train_data) - bike_train_data$cnt)^2))
