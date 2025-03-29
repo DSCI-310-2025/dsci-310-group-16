@@ -21,3 +21,4 @@ RUN Rscript -e "remotes::install_version('corrplot', version = '0.95', repos = '
 
 # installing test that
 RUN Rscript -e "remotes::install_version('testthat',version= '3.2.0', repos = 'https://cran.r-project.org')"
+RUN Rscript -e "remotes::install_version('here',version= '1.0.1', repos = 'https://cran.r-project.org')"
