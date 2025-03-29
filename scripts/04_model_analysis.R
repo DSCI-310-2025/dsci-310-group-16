@@ -54,8 +54,8 @@ write_csv(bike_tt_summary, output_file)
 
 
 # # Determine the best model
-# best_models <- regsubsets(log(cnt) ~ season + holiday + workingday + weathersit + temp + hum + windspeed,
-#                           data = bike_train, nvmax = 11)
+best_models <- regsubsets(log(cnt) ~ season + holiday + workingday + weathersit + temp + hum + windspeed,
+                          data = bike_train, nvmax = 11)
 
 final_model <- train_bike_model(
   bike_train,
