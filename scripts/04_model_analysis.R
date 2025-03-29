@@ -104,7 +104,7 @@ predictions_df <- eval_results$predictions
 
 # # Calculate RMSE
 # rmse_value <- rmse(preds = predictions, actuals = log(bike_test$cnt))
-# rmse_df <- data.frame(RMSE = rmse_value)
+rmse_df <- data.frame(RMSE = rmse_value)
 output_file4 = file.path(path = opt$output_dir, "rmse.csv")
 write_csv(rmse_df, output_file4)
 
