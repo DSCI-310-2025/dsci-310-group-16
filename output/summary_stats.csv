@@ -1,3 +1,0 @@
-partition,fraction,mediant_cnt,mean_cnt,"sd_cnt <- sd(cnt, na.rm = TRUE)"
-Train,0.75,142,189.80486494782076,181.62941100374468
-Test,0.25,142,188.43846330802853,180.67768851147028
