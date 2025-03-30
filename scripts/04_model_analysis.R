@@ -5,12 +5,10 @@ library(broom)
 library(ggplot2)
 library(mltools)
 library(docopt)
-library(testthat)
-library(here)
+source("R/visualize.R")
+source("R/model3_functions.R")
 
-source(here::here("R", "model3_functions.R"))
-
-"This script loads, cleans, saves titanic data
+"This script analzyes and models the bike data
 
 # Usage: 04_model_analysis.R --file_path=<file_path> --output_dir=<output_dir>
 # " -> doc

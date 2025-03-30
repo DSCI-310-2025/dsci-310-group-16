@@ -12,6 +12,23 @@ test_that("make_scatter creates a valid ggplot object", {
   expect_equal(p$labels$y, "Y-axis") # Check y-axis label
 })
 
+test_that("make_bar creates a valid ggplot object", {
+  # Sample data
+  data <- data.frame(
+    category = c("A", "B", "C"),
+    value = c(10, 15, 7),
+    group = c("G1", "G2", "G1")
+  )
+  # Generate the bar plot
+  p <- make_bar(data, "category", "value", "group", "Test Bar Plot", 
+                "Categories", "Values", "blue", c("A", "B", "C"))
+  
+  expect_s3_class(p, "ggplot")  # Check if it returns a ggplot object
+  expect_equal(p$labels$title, "Test Bar Plot")  # check the title
+  expect_equal(p$labels$x, "Categories")  # check x-axis
+  expect_equal(p$labels$y, "Values")  # check y-axis
+})
+
 test_that("save_plot function saves the file correctly", {
   data <- data.frame(x = 1:10, y = rnorm(10))
   p <- make_scatter(data, "x", "y", "Test Plot", "X-axis", "Y-axis", "blue")

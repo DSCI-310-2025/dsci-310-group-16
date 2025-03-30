@@ -1,6 +1,5 @@
 library(tidyverse)
 library(docopt)
-library(here)
 
 source("R/cleaning.R")
 
@@ -9,8 +8,8 @@ source("R/cleaning.R")
 Usage: 02_clean_data.R --file_path=<file_path> --output_path=<output_path>
 " -> doc
 
-here::i_am("scripts/02_clean_data.R")
-source(here::here("R", "cleaning.R"))
+# here::i_am("scripts/02_clean_data.R")
+# source(here::here("R", "cleaning.R"))
 
 opt <- docopt(doc)
 
