@@ -2,7 +2,7 @@
 
 # Contributors
 
-Annmarie Thomson, Arya Sardesai,Christina Zhang
+Annmarie Thomson, Arya Sardesai, Christina Zhang
 
 
 # Project Overview
@@ -29,11 +29,10 @@ docker run -it --rm -p 8787:8787 -v /$(pwd):/home/rstudio annmariect/dsci-310-gr
 
 - When prompted to put a password: Put the password from the run command
 
-5. To Run the analysis
-- In the terminal, type
-- ```bash
+5. To Run the analysis: in the terminal, type
+```bash
   make all
-  ```
+```
 
 7. Press "Knit" to get a copy of our report
 
