@@ -25,13 +25,20 @@ cd dsci-310-group-16
 
 2. Next, run:
 ```bash
-docker build -t annmariect/dsci-310-group-16 .
+docker build -t annmariect/dsci-310-group-16 . 
+docker run -it --rm -p 8787:8787 -v /$(pwd):/home/rstudio annmariect/dsci-310-group-16
+
+```
+Alternatively, pull the image from Docker Hub:
+```bash
+docker pull annmariect/dsci-310-group-16
 docker run -it --rm -p 8787:8787 -v /$(pwd):/home/rstudio annmariect/dsci-310-group-16
 ```
 
+
 4. In a browser, open up: http://localhost:8787
 
-- When prompted to put a username: Rstudio
+- When prompted to put a username: rstudio
 
 - When prompted to put a password: Put the password from the run command
 
