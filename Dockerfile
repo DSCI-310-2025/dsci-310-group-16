@@ -7,7 +7,7 @@ RUN Rscript -e "remotes::install_version('tidyverse', version='2.0.0', repos = '
 RUN Rscript -e "remotes::install_version('tidymodels', version='1.3.0', repos = 'https://cran.rstudio.com')"
 
 RUN Rscript -e "remotes::install_version('vroom', version='1.6.5', repos = 'https://cran.r-project.org')"
-RUN Rscript -e "remotes::install_version('ucimlrepo', version='0.0.2', repos = 'https://cran.r-project.org')"
+RUN Rscript -e "install.packages('remotes', repos='https://cran.r-project.org')"
 
 RUN Rscript -e "remotes::install_version('leaps', version = '3.2', repos = 'https://cran.rstudio.com')"
 RUN Rscript -e "remotes::install_version('mltools', version = '0.3.5', repos = 'https://cran.rstudio.com')"
