@@ -5,8 +5,7 @@ library(broom)
 library(ggplot2)
 library(mltools)
 library(docopt)
-source("R/visualize.R")
-source("R/model3_functions.R")
+library(predict.bike)
 
 "This script analzyes and models the bike data
 

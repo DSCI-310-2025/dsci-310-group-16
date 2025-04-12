@@ -25,3 +25,4 @@ RUN Rscript -e "remotes::install_version('pointblank', version = '0.12.2', repos
 # installing test that
 RUN Rscript -e "remotes::install_version('testthat',version= '3.2.0', repos = 'https://cran.r-project.org')"
 
+RUN Rscript -e "remotes::install_github('DSCI-310-2025/predict.bike@main')"
