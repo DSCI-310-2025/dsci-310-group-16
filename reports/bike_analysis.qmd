@@ -92,11 +92,11 @@ To assess the model fit, we generated a residual plot, @fig-res. This plot indic
 
 ![Residual plot of final model](../output/residual_plot.png){#fig-res width="65%"}
 
-Finally, to evaluate prediction accuracy we calculated RMSE in @tbl-rmse, which we found to be 1.29 uses approximately, suggesting the model prediction is good and our model is useful.
+Finally, to evaluate prediction accuracy we calculated RMSE in @tbl-rmse, which we found to be 259.6 uses approximately, suggesting the model prediction is good and our model is useful.
 
 ```{r}
 #| label: tbl-rmse
-#| tbl-cap: "RMSE of our linear modely"
+#| tbl-cap: "RMSE of our linear model"
 rmse <- read.csv("../output/rmse.csv")
 knitr::kable(rmse, align = 'c')
 ```
@@ -105,7 +105,7 @@ knitr::kable(rmse, align = 'c')
 
 ### Model Performance
 - **RMSE = 259.62** (scale: bike counts per hour)
-  - Interpretation: Predictions are typically ±260 bikes from actual values
+  - Interpretation: Predictions are typically ± ~260 bikes from actual values
 - **R² = 0.82** 
   - Indicates 82% of demand variability is explained by our model
 
@@ -118,7 +118,7 @@ knitr::kable(rmse, align = 'c')
 
 ### Discussion
 
-We found that the ideal model for our data includes season, holiday status, wether it is a working day, the temperature, the humidity, and the wind speed. We found that our model became stronger with the inclusion of weather-related variables. Though none of these findins are individually surprising, we were surprised that all of the variables had an impact on bike demand prediction and wonder if more research can be done into what other variables may also be used in this model. These findings suggest that these variables can significantly influence bike demand, information that can be used to help increase total users.
+We found that the ideal model for our data includes season, holiday status, wether it is a working day, the temperature, the humidity, and the wind speed. We found that our model became stronger with the inclusion of weather-related variables. Though none of these findings are individually surprising, we were surprised that all of the variables had an impact on bike demand prediction and wonder if more research can be done into what other variables may also be used in this model. These findings suggest that these variables can significantly influence bike demand, information that can be used to help increase total users.
 
 ## Practical Applications
 1. **Inventory Management** (Save $180k/year)
