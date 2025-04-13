@@ -1,7 +1,6 @@
 library(tidyverse)
 library(docopt)
-
-source("R/cleaning.R")
+library(predict.bike)
 
 "This script loads, cleans, saves titanic data
 

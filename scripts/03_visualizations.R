@@ -4,7 +4,7 @@ library(ggplot2)
 library(ggpubr)
 library(corrplot)
 library(docopt)
-source("R/visualize.R")
+library(predict.bike)
 
 "This script loads, cleans, saves titanic data
 
